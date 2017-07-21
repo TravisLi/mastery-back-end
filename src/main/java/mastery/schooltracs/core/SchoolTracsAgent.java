@@ -97,6 +97,8 @@ public class SchoolTracsAgent {
 			//find the lesson without gap
 			List<Lesson> g0Lsons = SchoolTracsUtil.findSimLvlLsonOfTch(src, 0, tLsons);
 
+			logger.info("g0Lsons count="+g0Lsons.size());
+			
 			for(Lesson l: fltLsonByRmAva(g0Lsons, rdLsonHash)){
 				rstLsons.add(l);
 				if(rstLsons.size()==3){
@@ -106,7 +108,9 @@ public class SchoolTracsAgent {
 
 			//find the lesson with gap 1
 			List<Lesson> g1Lsons = SchoolTracsUtil.findSimLvlLsonOfTch(src, 1, tLsons);
-
+			
+			logger.info("g1Lsons count="+g1Lsons.size());
+			
 			for(Lesson l: fltLsonByRmAva(g1Lsons, rdLsonHash)){
 				rstLsons.add(l);
 				if(rstLsons.size()==3){
@@ -125,7 +129,9 @@ public class SchoolTracsAgent {
 	}
 
 	private List<Lesson> fltLsonByRmAva(List<Lesson> lsons, HashMap<String, List<Lesson>> rdLsonHash){
-
+		
+		logger.info("Filter Lesson by Room Availability");
+		
 		List<Lesson> rstLsons = new ArrayList<Lesson>();
 
 		lsons.forEach((l)->{
@@ -151,6 +157,8 @@ public class SchoolTracsAgent {
 
 				boolean isRmFull = SchoolTracsUtil.isRmFullInPrd(r, l.getStartDateTime(), l.getEndDateTime(), lsonsByRm);
 				if(!isRmFull){
+					logger.info("Room is not Full");
+					logger.info("Lesson is added to list" + l.toString());
 					rstLsons.add(l);
 				}
 
@@ -183,7 +191,7 @@ public class SchoolTracsAgent {
 		logger.info("Search Lesson by Room Start");
 
 		//without facility, product
-		SearchRequest.ContentOpt opt =new SearchRequest.ContentOpt(true,false,false,true);
+		SearchRequest.ContentOpt opt =new SearchRequest.ContentOpt(true,true,false,true);
 
 		return this.schLson(name, fromDate, toDate, SchoolTracsConst.DisplayMode.FACILITY.code(), opt);
 
@@ -194,7 +202,7 @@ public class SchoolTracsAgent {
 		logger.info("Search Lesson by Teacher Start");
 
 		//without product staff
-		SearchRequest.ContentOpt opt =new SearchRequest.ContentOpt(true,true,false,false);
+		SearchRequest.ContentOpt opt =new SearchRequest.ContentOpt(true,true,false,true);
 
 		return schLson(name, fromDate, toDate, SchoolTracsConst.DisplayMode.STAFF.code(), opt);
 

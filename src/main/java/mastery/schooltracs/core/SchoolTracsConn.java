@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.http.Consts;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -19,6 +20,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -47,12 +49,12 @@ public class SchoolTracsConn {
 
 	public SchoolTracsConn() {
 		
-//		HttpHost proxy = new HttpHost("judpocproxy.poc.et", 8080);
-//		DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
-//		
-//		httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).build();
+		HttpHost proxy = new HttpHost("judpocproxy.poc.et", 8080);
+		DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
 		
-		httpClient = HttpClientBuilder.create().build();
+		httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).build();
+		
+		//httpClient = HttpClientBuilder.create().build();
 		localContext = HttpClientContext.create();
 		cookieStore = new BasicCookieStore();
 		localContext.setCookieStore(cookieStore);

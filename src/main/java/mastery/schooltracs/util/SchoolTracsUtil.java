@@ -27,7 +27,7 @@ public class SchoolTracsUtil {
 			
 	public static List<Lesson> findSimLvlLsonOfTch(final Lesson src, final int lvlGap, final List<Lesson> listByTch){
 		
-		logger.info("Find Similar Level Lessons of Teacher");
+		logger.info("Find Similar Level Lessons of Teacher with lvlGap=" + lvlGap);
 		
 		List<Lesson> list = new ArrayList<Lesson>();
 		
@@ -54,7 +54,8 @@ public class SchoolTracsUtil {
 			
 			int calGap = s1.getLvl().code()-s2.getLvl().code();
 			
-			logger.debug("calGap="+calGap);
+			logger.debug("calGap="+Math.abs(calGap));
+			logger.debug("lvlGap="+lvlGap);
 			
 			//the gap between two student meet the requirement
 			boolean meetLvl = Math.abs(calGap) <= lvlGap;
@@ -68,6 +69,7 @@ public class SchoolTracsUtil {
 			logger.debug("sameStudent="+sameStd);
 			
 			if(sameName&&sameFrLvl&&sameToLvl&&meetLvl&&!sameStd){
+				logger.info("Lesson is added to list for return =" + l.toString());
 				list.add(l);
 			}
 			
@@ -100,13 +102,13 @@ public class SchoolTracsUtil {
 			logger.debug("No.of Studnet="+noOfStd);
 			
 			if(noOfStd>r.getCap()){
-				return false;
+				return true;
 			}
 			cal.add(Calendar.MINUTE, minStep);
 			cTime = cal.getTime();
 		}
 		
-		return true;
+		return false;
 		
 	}
 	

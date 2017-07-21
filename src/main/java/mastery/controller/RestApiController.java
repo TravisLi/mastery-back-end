@@ -34,7 +34,7 @@ public class RestApiController {
 	SchoolTracsAgent agent;
 		
 	@RequestMapping(value = "/lesson/student/{name}/{weekNo}", method = RequestMethod.GET)
-	public ResponseEntity<List<Lesson>> getStdLsons(@PathVariable("name")String name, Integer weekNo){
+	public ResponseEntity<List<Lesson>> getStdLsons(@PathVariable("name")String name, @PathVariable("weekNo")Integer weekNo){
 		logger.info("Get Student Lesson Start");
 		logger.info("name="+name+" weekNo="+weekNo);
 		Calendar stCal = MasteryUtil.getPlainCal(new Date());
