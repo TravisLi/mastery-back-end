@@ -25,13 +25,28 @@ public class SchoolTracsUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(SchoolTracsUtil.class);
 			
-	public static List<Lesson> findSimLvlLsonOfTch(final Lesson src, final int lvlGap, final List<Lesson> listByTch){
+	public static List<Lesson> findSimLvlLsonOfTch(final Lesson src, final String stdName, final int lvlGap, final List<Lesson> listByTch){
 		
 		logger.info("Find Similar Level Lessons of Teacher with lvlGap=" + lvlGap);
 		
 		List<Lesson> list = new ArrayList<Lesson>();
 		
 		logger.debug("Src Lesson="+src);
+		
+		Student master = null;
+		
+		for(Student s: src.getStudents()){
+			if(s.getName().equals(stdName)){
+				master = s;
+			}
+		}
+		
+		if(master == null){
+			return list;
+		}
+		
+		logger.info("master student id=" + master.getId());
+		logger.info("master student name=" + master.getName());
 		
 		for(Lesson l: listByTch){
 			
@@ -41,27 +56,29 @@ public class SchoolTracsUtil {
 			boolean sameFrLvl = l.getFrLvl().equals(src.getFrLvl());
 			boolean sameToLvl = l.getToLvl().equals(src.getToLvl());
 			
-			Student s1 = null;
-			Student s2 = null;
-			
-			if(l.getStdList().size()>0){
-				s1 = l.getStdList().get(0);
-			}
-			
-			if(src.getStdList().size()>0){
-				s2 = src.getStdList().get(0);
-			}
-			
-			int calGap = s1.getLvl().code()-s2.getLvl().code();
-			
-			logger.debug("calGap="+Math.abs(calGap));
-			logger.debug("lvlGap="+lvlGap);
-			
 			//the gap between two student meet the requirement
-			boolean meetLvl = Math.abs(calGap) <= lvlGap;
+			boolean meetLvl = true;
 			
-			boolean sameStd = s1.getId().equals(s2.getId());
+			boolean sameStd = false;
 			
+			for(Student s: l.getStudents()){
+				
+				if(master.getId().equals(s.getId())){
+					sameStd = true;
+				}
+				
+				int calGap = master.getLvl().code()-s.getLvl().code();
+				
+				logger.debug("calGap="+Math.abs(calGap));
+				logger.debug("lvlGap="+lvlGap);
+				
+				//either one student not match forfeit
+				if(Math.abs(calGap) != lvlGap){
+					meetLvl = false;
+				}
+					
+			}
+						
 			logger.debug("sameName="+sameName);
 			logger.debug("sameFrLvl="+sameFrLvl);
 			logger.debug("sameToLvl="+sameToLvl);
@@ -121,7 +138,7 @@ public class SchoolTracsUtil {
 		for(Lesson l: listByRoom){
 			if(timeFallIntoTheMiddleOfLson(l,time)){
 				logger.info("lesson fall into middle" + l.toString());
-				stdCnt += l.getStdList().size();
+				stdCnt += l.getStudents().size();
 			}
 		}
 		
@@ -203,7 +220,7 @@ public class SchoolTracsUtil {
 					
 					if(sHash.containsKey(l.getId())){
 						for(Student s: sHash.get(l.getId())){
-							l.getStdList().add(s);
+							l.getStudents().add(s);
 							if(!s.getPaid()){
 								error = true;
 							}
