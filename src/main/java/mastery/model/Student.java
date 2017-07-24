@@ -25,7 +25,7 @@ public class Student {
 	}
 
 	public Student(CustomerMap map){
-		this.id = map.getId();
+		this.id = map.getCustomerId();
 		this.name = map.getName();
 		this.lvl = SchoolTracsUtil.classifyLevel(map.getLevel());
 		this.paid = true;

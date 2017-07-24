@@ -24,7 +24,7 @@ public class Lesson {
 	private Date startDateTime;
 	private Date endDateTime;
 	private Teacher teacher;
-	private List<Student> stdList = new ArrayList<Student>();
+	private List<Student> students = new ArrayList<Student>();
 	private Room room;
 	
 	public Lesson() {
@@ -32,7 +32,7 @@ public class Lesson {
 	}
 
 	public Lesson(String id, String name, Level frLvl, Level toLvl, Date startDateTime, Date endDateTime,
-			Teacher teacher, List<Student> stdList, Room room) {
+			Teacher teacher, List<Student> students, Room room) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -41,7 +41,7 @@ public class Lesson {
 		this.startDateTime = startDateTime;
 		this.endDateTime = endDateTime;
 		this.teacher = teacher;
-		this.stdList = stdList;
+		this.students = students;
 		this.room = room;
 	}
 
@@ -112,11 +112,11 @@ public class Lesson {
 	public void setTeacher(Teacher teacher) {
 		this.teacher = teacher;
 	}
-	public List<Student> getStdList() {
-		return stdList;
+	public List<Student> getStudents() {
+		return students;
 	}
-	public void setStdList(List<Student> stdList) {
-		this.stdList = stdList;
+	public void setStdList(List<Student> students) {
+		this.students = students;
 	}
 	public Room getRoom() {
 		return room;
@@ -124,7 +124,7 @@ public class Lesson {
 	@Override
 	public String toString() {
 		return "Lesson [id=" + id + ", name=" + name + ", frLvl=" + frLvl + ", toLvl=" + toLvl + ", startDateTime="
-				+ startDateTime + ", endDateTime=" + endDateTime + ", teacher=" + teacher + ", stdList=" + stdList
+				+ startDateTime + ", endDateTime=" + endDateTime + ", teacher=" + teacher + ", students=" + students
 				+ ", room=" + room + "]";
 	}
 

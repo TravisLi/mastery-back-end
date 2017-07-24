@@ -68,7 +68,7 @@ public class SchoolTracsAgent {
 		return null;
 	}
 
-	public List<Lesson> schMkupCls(Lesson src){
+	public List<Lesson> schMkupCls(Lesson src, String stdName){
 
 		logger.info("Search For Makeup Class Start");
 		//room-date Hash
@@ -95,7 +95,7 @@ public class SchoolTracsAgent {
 			List<Lesson> tLsons = this.schLsonByTch(t.getName(),stDate,edDate);
 
 			//find the lesson without gap
-			List<Lesson> g0Lsons = SchoolTracsUtil.findSimLvlLsonOfTch(src, 0, tLsons);
+			List<Lesson> g0Lsons = SchoolTracsUtil.findSimLvlLsonOfTch(src, stdName, 0, tLsons);
 
 			logger.info("g0Lsons count="+g0Lsons.size());
 			
@@ -107,7 +107,7 @@ public class SchoolTracsAgent {
 			}
 
 			//find the lesson with gap 1
-			List<Lesson> g1Lsons = SchoolTracsUtil.findSimLvlLsonOfTch(src, 1, tLsons);
+			List<Lesson> g1Lsons = SchoolTracsUtil.findSimLvlLsonOfTch(src, stdName, 1, tLsons);
 			
 			logger.info("g1Lsons count="+g1Lsons.size());
 			

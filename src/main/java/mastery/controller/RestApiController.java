@@ -37,10 +37,15 @@ public class RestApiController {
 	public ResponseEntity<List<Lesson>> getStdLsons(@PathVariable("name")String name, @PathVariable("weekNo")Integer weekNo){
 		logger.info("Get Student Lesson Start");
 		logger.info("name="+name+" weekNo="+weekNo);
+		//for demo purpose we date back to march
 		Calendar stCal = MasteryUtil.getPlainCal(new Date());
-		Calendar edCal = MasteryUtil.getPlainCal(new Date());
+		
+		stCal.set(Calendar.MONTH, 3);
+		stCal.set(Calendar.DAY_OF_MONTH,20);
+		
+		Calendar edCal = MasteryUtil.getPlainCal(stCal.getTime());
 		stCal.add(Calendar.DAY_OF_MONTH, (weekNo-1)*7);
-		edCal.add(Calendar.DAY_OF_MONTH, weekNo*7);
+		edCal.add(Calendar.DAY_OF_MONTH, weekNo*2*7);
 		
 		List<Lesson> list = new ArrayList<Lesson>();
 		try {
@@ -57,11 +62,11 @@ public class RestApiController {
 		return new ResponseEntity<List<Lesson>>(list, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/mkuplson/find/", method = RequestMethod.POST)
-	public ResponseEntity<List<Lesson>> findMkupLsons(@RequestBody Lesson lson){		
+	@RequestMapping(value = "/mkuplson/find/{stdName}", method = RequestMethod.POST)
+	public ResponseEntity<List<Lesson>> findMkupLsons(@RequestBody Lesson lson, @PathVariable("stdName")String stdName){		
 		List<Lesson> list = new ArrayList<Lesson>();
 		
-		list = agent.schMkupCls(lson);
+		list = agent.schMkupCls(lson,stdName);
 		
 		logger.info(list.toString());
 		
