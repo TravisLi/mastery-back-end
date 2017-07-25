@@ -58,8 +58,8 @@ public class SearchRequestSerializer extends JsonSerializer<SearchRequest> {
 		jg.writeString(req.getSearchStr());
 		jg.writeEndArray();
 		
-		jg.writeString(SchoolTracsConst.SDF.format(req.getFromDate()));
-		jg.writeString(SchoolTracsConst.SDF.format(req.getToDate()));
+		jg.writeString(SchoolTracsConst.SDF_FULL.format(req.getFromDate()));
+		jg.writeString(SchoolTracsConst.SDF_FULL.format(req.getToDate()));
 		jg.writeString(req.getTimeslot());
 		jg.writeNumber(req.getUnknownInt1());
 		jg.writeNumber(req.getUnknownInt2());

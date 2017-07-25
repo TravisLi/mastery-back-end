@@ -107,7 +107,7 @@ public class SchoolTracsConn {
 		
 		SearchRequest req = new SearchRequest(reqSeq,SchoolTracsConst.Task.SEARCH_ACTIVITY.code(),displayMode,searchStr,fromDate,toDate,"",contentOpt);
 				
-		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.INFO_REQ_URL, buildInfoReqJson(req)));
+		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.TASK_REQ_URL, buildInfoReqJson(req)));
 
 		return EntityUtils.toString(request.getEntity());
 				

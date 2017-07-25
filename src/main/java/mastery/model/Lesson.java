@@ -23,9 +23,11 @@ public class Lesson {
 	private SchoolTracsConst.Level toLvl;
 	private Date startDateTime;
 	private Date endDateTime;
+	private String centerId;
+	private Room room;
 	private Teacher teacher;
 	private List<Student> students = new ArrayList<Student>();
-	private Room room;
+	
 	
 	public Lesson() {
 		super();
@@ -48,7 +50,7 @@ public class Lesson {
 	public Lesson(Activity act) throws ParseException{
 		this.id = act.getId();
 		this.name = act.getName();
-		
+		this.centerId = act.getCenterId();
 		String[] lvls= act.getLevel().split("-");
 		if(lvls.length==2){
 			frLvl = SchoolTracsUtil.classifyLevel(lvls[0]);
@@ -61,23 +63,28 @@ public class Lesson {
 		logger.debug("startDate=" + startDateStr);
 		logger.debug("endDate=" + endDateStr);
 		
-		this.startDateTime = SchoolTracsConst.SDF.parse(startDateStr);
-		this.endDateTime = SchoolTracsConst.SDF.parse(endDateStr);
+		this.startDateTime = SchoolTracsConst.SDF_FULL.parse(startDateStr);
+		this.endDateTime = SchoolTracsConst.SDF_FULL.parse(endDateStr);
 	}
+	
+	
 	
 	public String getId() {
 		return id;
 	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public SchoolTracsConst.Level getFrLvl() {
 		return frLvl;
 	}
@@ -90,37 +97,58 @@ public class Lesson {
 		return toLvl;
 	}
 
-	public void setToLevel(SchoolTracsConst.Level toLvl) {
+	public void setToLvl(SchoolTracsConst.Level toLvl) {
 		this.toLvl = toLvl;
 	}
 
 	public Date getStartDateTime() {
 		return startDateTime;
 	}
+
 	public void setStartDateTime(Date startDateTime) {
 		this.startDateTime = startDateTime;
 	}
+
 	public Date getEndDateTime() {
 		return endDateTime;
 	}
+
 	public void setEndDateTime(Date endDateTime) {
 		this.endDateTime = endDateTime;
 	}
-	public Teacher getTeacher() {
-		return teacher;
+
+	public String getCenterId() {
+		return centerId;
 	}
-	public void setTeacher(Teacher teacher) {
-		this.teacher = teacher;
+
+	public void setCenterId(String centerId) {
+		this.centerId = centerId;
 	}
-	public List<Student> getStudents() {
-		return students;
-	}
-	public void setStdList(List<Student> students) {
-		this.students = students;
-	}
+
 	public Room getRoom() {
 		return room;
 	}
+
+	public void setRoom(Room room) {
+		this.room = room;
+	}
+
+	public Teacher getTeacher() {
+		return teacher;
+	}
+
+	public void setTeacher(Teacher teacher) {
+		this.teacher = teacher;
+	}
+
+	public List<Student> getStudents() {
+		return students;
+	}
+
+	public void setStudents(List<Student> students) {
+		this.students = students;
+	}
+
 	@Override
 	public String toString() {
 		return "Lesson [id=" + id + ", name=" + name + ", frLvl=" + frLvl + ", toLvl=" + toLvl + ", startDateTime="
@@ -128,9 +156,4 @@ public class Lesson {
 				+ ", room=" + room + "]";
 	}
 
-	public void setRoom(Room room) {
-		this.room = room;
-	}
-
-	
 }

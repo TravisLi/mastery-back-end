@@ -67,6 +67,11 @@ public class SchoolTracsAgent {
 		}
 		return null;
 	}
+	
+	public Boolean appMkupCls(Lesson src, String stdId){
+		logger.info("Apply Makeup class start");
+		return true;
+	}
 
 	public List<Lesson> schMkupCls(Lesson src, String stdName){
 
@@ -138,7 +143,7 @@ public class SchoolTracsAgent {
 			if(rmHash.containsKey(l.getRoom().getId())){
 				Room r = rmHash.get(l.getRoom().getId());
 				Calendar cal = MasteryUtil.getPlainCal(l.getStartDateTime());
-				String key = r.getId() + "_" + SchoolTracsConst.SDF.format(cal.getTime());
+				String key = r.getId() + "_" + SchoolTracsConst.SDF_FULL.format(cal.getTime());
 				logger.debug("Hash Key=" + key);
 				List<Lesson> lsonsByRm = null;
 

@@ -40,8 +40,8 @@ public class RestApiController {
 		//for demo purpose we date back to march
 		Calendar stCal = MasteryUtil.getPlainCal(new Date());
 		
-		stCal.set(Calendar.MONTH, 3);
-		stCal.set(Calendar.DAY_OF_MONTH,20);
+		stCal.set(Calendar.MONTH, 6);
+		stCal.set(Calendar.DAY_OF_MONTH,1);
 		
 		Calendar edCal = MasteryUtil.getPlainCal(stCal.getTime());
 		stCal.add(Calendar.DAY_OF_MONTH, (weekNo-1)*7);
@@ -71,6 +71,16 @@ public class RestApiController {
 		logger.info(list.toString());
 		
 		return new ResponseEntity<List<Lesson>>(list, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/mkuplson/apply/{stdId}", method = RequestMethod.POST)
+	public ResponseEntity<Boolean> applyMkupLsons(@RequestBody Lesson lson, @PathVariable("stdId")String stdId){		
+		
+		Boolean result = agent.appMkupCls(lson,stdId);
+		
+		logger.info(result.toString());
+		
+		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
 
 }
