@@ -5,23 +5,21 @@ import java.util.Date;
 import mastery.model.Lesson;
 import mastery.schooltracs.util.SchoolTracsConst;
 
-/*{"6 ":
- * ["Activity.searchActivities",
- * "2",
- * {"customer":true,"facility":true,"staff":true,"product":true},
- * "s",
- * ["K2�Ӯa"],
- * "2017-05-25 00:00:00",
- * "2017-05-25 00:00:00",
- * "",
- * 4,
- * 50,
- * "2",
- * {}]}
- * */
-
 public class NewMakeupRequest {
 
+	/*{
+	 * "14 ":[
+	 * "ActivityCustomer.newMakeUp",{
+	 * "date":"2017-08-07",
+	 * "startTime":"10:45",
+	 * "endTime":"11:45",
+	 * "staffId":"22",
+	 * "facilityId":"3",
+	 * "productId":"",
+	 * "id":412610,
+	 * "centerId":"2",
+	 * "customerId":[813]}]}*/
+	
 	private Integer reqSeq;
 	private String task;
 	private Date startTime;

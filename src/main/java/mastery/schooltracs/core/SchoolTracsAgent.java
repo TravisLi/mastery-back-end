@@ -1,6 +1,7 @@
 package mastery.schooltracs.core;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -25,6 +27,7 @@ import mastery.model.Lesson;
 import mastery.model.Room;
 import mastery.model.Teacher;
 import mastery.schooltracs.model.Facility;
+import mastery.schooltracs.model.NewMakeupRequest;
 import mastery.schooltracs.model.SearchRequest;
 import mastery.schooltracs.model.SearchResponse;
 import mastery.schooltracs.util.FacilitiesDeserializer;
@@ -68,8 +71,12 @@ public class SchoolTracsAgent {
 		return null;
 	}
 	
-	public Boolean appMkupCls(Lesson src, String stdId){
+	public Boolean aplyMkup(Lesson l, String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{
 		logger.info("Apply Makeup class start");
+		String result = conn.sendNewMkupReq(l, stdId);
+		if(result.contains("Exception")){
+			return false;
+		}
 		return true;
 	}
 

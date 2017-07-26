@@ -1,6 +1,7 @@
 package mastery.controller;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import mastery.model.Lesson;
 import mastery.schooltracs.core.SchoolTracsAgent;
@@ -74,9 +77,9 @@ public class RestApiController {
 	}
 	
 	@RequestMapping(value = "/mkuplson/apply/{stdId}", method = RequestMethod.POST)
-	public ResponseEntity<Boolean> applyMkupLsons(@RequestBody Lesson lson, @PathVariable("stdId")String stdId){		
+	public ResponseEntity<Boolean> applyMkupLsons(@RequestBody Lesson lson, @PathVariable("stdId")String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
 		
-		Boolean result = agent.appMkupCls(lson,stdId);
+		Boolean result = agent.aplyMkup(lson,stdId);
 		
 		logger.info(result.toString());
 		

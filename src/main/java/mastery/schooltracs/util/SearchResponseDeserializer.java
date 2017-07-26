@@ -43,7 +43,7 @@ public class SearchResponseDeserializer extends JsonDeserializer<SearchResponse>
 
 		JsonNode rootNode = p.getCodec().readTree(p);
 	
-		sr.setActivites(processActivity(rootNode.get(ACT_KEY)));
+		sr.setActivities(processActivity(rootNode.get(ACT_KEY)));
 		sr.setStaffMaps(processStaff(rootNode.get(STAFF_KEY)));
 		sr.setCustomerMaps(processCustomer(rootNode.get(CUST_KEY)));
 		sr.setFacilityMaps(processFacility(rootNode.get(FAC_KEY)));

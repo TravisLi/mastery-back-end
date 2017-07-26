@@ -199,7 +199,7 @@ public class SchoolTracsUtil {
 		HashMap<String, List<Student>> sHash = custMapToActHash(sr.getCustomerMaps());
 		HashMap<String, Room> rHash = facMapToActHash(sr.getFacilityMaps());
 		
-		for(Activity a: sr.getActivites()){
+		for(Activity a: sr.getActivities()){
 			if(!a.getEnrolled().equals("0")){
 				boolean error = false;
 				try {  

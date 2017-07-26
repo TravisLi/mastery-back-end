@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.apache.http.Consts;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -20,7 +19,6 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -31,7 +29,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import mastery.model.Lesson;
+import mastery.schooltracs.model.NewMakeupRequest;
 import mastery.schooltracs.model.SearchRequest;
+import mastery.schooltracs.util.NewMakeupRequestSerializer;
 import mastery.schooltracs.util.SchoolTracsConst;
 import mastery.schooltracs.util.SearchRequestSerializer;
 
@@ -107,10 +108,21 @@ public class SchoolTracsConn {
 		
 		SearchRequest req = new SearchRequest(reqSeq,SchoolTracsConst.Task.SEARCH_ACTIVITY.code(),displayMode,searchStr,fromDate,toDate,"",contentOpt);
 				
-		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.TASK_REQ_URL, buildInfoReqJson(req)));
+		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.TASK_REQ_URL, buildSchReqJson(req)));
 
 		return EntityUtils.toString(request.getEntity());
 				
+	}
+	
+	public String sendNewMkupReq(Lesson l, String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{
+		
+		NewMakeupRequest req = new NewMakeupRequest(l);
+		req.setCustomerId(stdId);
+		
+		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.TASK_REQ_URL, buildNewMakeupReqJson(req)));
+
+		return EntityUtils.toString(request.getEntity());
+		
 	}
 	
 	private HttpResponse excuteClient(HttpPost post) throws ClientProtocolException, IOException{
@@ -142,7 +154,7 @@ public class SchoolTracsConn {
 		return post;
 	}
 	
-	private static String buildInfoReqJson(SearchRequest req) throws JsonProcessingException{
+	private static String buildSchReqJson(SearchRequest req) throws JsonProcessingException{
 		
 		ObjectMapper om = new ObjectMapper();
 		//Set pretty printing of json
@@ -150,6 +162,23 @@ public class SchoolTracsConn {
 
 		SimpleModule module = new SimpleModule();
 		module.addSerializer(SearchRequest.class, new SearchRequestSerializer());
+		om.registerModule(module);
+
+		String json = om.writeValueAsString(req);
+		
+		logger.debug(json);
+		
+		return json;
+	}
+	
+	private static String buildNewMakeupReqJson(NewMakeupRequest req) throws JsonProcessingException{
+		
+		ObjectMapper om = new ObjectMapper();
+		//Set pretty printing of json
+		om.enable(SerializationFeature.INDENT_OUTPUT);
+
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(NewMakeupRequest.class, new NewMakeupRequestSerializer());
 		om.registerModule(module);
 
 		String json = om.writeValueAsString(req);

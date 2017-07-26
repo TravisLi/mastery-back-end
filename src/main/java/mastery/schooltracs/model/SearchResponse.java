@@ -16,7 +16,7 @@ public class SearchResponse {
 	"facilityMap":{},
 	"productMap":{}}*/
 	
-	private List<Activity> activites;
+	private List<Activity> activities;
 	private List<String> staffColData;
 	private List<String> customerColData;
 	private List<String> roomColData;
@@ -27,11 +27,11 @@ public class SearchResponse {
 	private List<ProductMap> productMaps;
 	private List<CustomerMap> customerMaps;
 	
-	public List<Activity> getActivites() {
-		return activites;
+	public List<Activity> getActivities() {
+		return activities;
 	}
-	public void setActivites(List<Activity> activites) {
-		this.activites = activites;
+	public void setActivities(List<Activity> activities) {
+		this.activities = activities;
 	}
 	public List<String> getStaffColData() {
 		return staffColData;
