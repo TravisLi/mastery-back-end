@@ -1,4 +1,4 @@
-package mastery.schooltracs.util;
+package mastery.schooltracs.json.deserializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,41 +15,41 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import mastery.schooltracs.model.Facility;
+import mastery.schooltracs.model.Customer;
 
-public class FacilitiesDeserializer extends JsonDeserializer<List<Facility>> {
+public class CustomersDeserializer extends JsonDeserializer<List<Customer>> {
 
-	private static final Logger logger = LoggerFactory.getLogger(FacilitiesDeserializer.class);
-	
+	private static final Logger logger = LoggerFactory.getLogger(CustomersDeserializer.class);
+
 	@Override
-	public List<Facility> deserialize(JsonParser p, DeserializationContext ctxt)
+	public List<Customer> deserialize(JsonParser p, DeserializationContext ctxt)
 			throws IOException, JsonProcessingException {
-		
-		List<Facility> list = new ArrayList<Facility>();
-		
+
+		List<Customer> list = new ArrayList<Customer>();
+
 		do{
 			p.nextToken();
 		}while(!p.getCurrentName().equals("data"));
 
 		JsonNode rootNode = p.getCodec().readTree(p);
-	
+
 		if(rootNode!=null){
-			
+
 			ObjectMapper mapper = new ObjectMapper();
-			
+
 			Iterator<JsonNode>itr = rootNode.iterator();
-			
+
 			while(itr.hasNext()){
 				JsonNode node = itr.next();
 				if(node.isArray()){
 					for(JsonNode n: node){
-						logger.debug("facility node=" + n);				
-						Facility fac = mapper.readValue(n.toString(), Facility.class);
-						list.add(fac);
+						logger.debug("customer node=" + n);				
+						Customer c = mapper.readValue(n.toString(), Customer.class);
+						list.add(c);
 					}
 				}	
 			}
-			
+
 		}
 
 		return list;

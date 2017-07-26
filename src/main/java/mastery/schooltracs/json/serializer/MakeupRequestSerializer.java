@@ -1,4 +1,4 @@
-package mastery.schooltracs.util;
+package mastery.schooltracs.json.serializer;
 
 import java.io.IOException;
 
@@ -7,12 +7,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-import mastery.schooltracs.model.NewMakeupRequest;
+import mastery.schooltracs.model.MakeupRequest;
+import mastery.schooltracs.util.SchoolTracsConst;
 
-public class NewMakeupRequestSerializer extends JsonSerializer<NewMakeupRequest> {
+public class MakeupRequestSerializer extends JsonSerializer<MakeupRequest> {
 	
 	@Override
-	public void serialize(NewMakeupRequest req, JsonGenerator jg, SerializerProvider sp)
+	public void serialize(MakeupRequest req, JsonGenerator jg, SerializerProvider sp)
 			throws IOException, JsonProcessingException {
 				
 		/*{

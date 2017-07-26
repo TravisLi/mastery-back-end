@@ -5,7 +5,7 @@ import java.util.Date;
 import mastery.model.Lesson;
 import mastery.schooltracs.util.SchoolTracsConst;
 
-public class NewMakeupRequest {
+public class MakeupRequest {
 
 	/*{
 	 * "14 ":[
@@ -31,7 +31,7 @@ public class NewMakeupRequest {
 	private String centerId;
 	private String customerId;
 	
-	public NewMakeupRequest(Integer reqSeq, Lesson l, String custId){
+	public MakeupRequest(Integer reqSeq, Lesson l, String custId){
 		this.reqSeq = reqSeq;
 		this.task = SchoolTracsConst.Task.NEW_MAKE_UP.code();
 		this.startTime = l.getStartDateTime();

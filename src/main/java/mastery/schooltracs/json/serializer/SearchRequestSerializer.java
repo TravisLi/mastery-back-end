@@ -1,4 +1,4 @@
-package mastery.schooltracs.util;
+package mastery.schooltracs.json.serializer;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import mastery.schooltracs.model.SearchRequest;
+import mastery.schooltracs.util.SchoolTracsConst;
 
 public class SearchRequestSerializer extends JsonSerializer<SearchRequest> {
 	

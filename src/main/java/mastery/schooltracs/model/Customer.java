@@ -37,6 +37,8 @@ public class Customer {
 	private String updated;
 	private String deleted;
 	private String oid;
+	private String mergeId;
+	
 	public String getId() {
 		return id;
 	}
@@ -246,6 +248,12 @@ public class Customer {
 	}
 	public void setOid(String oid) {
 		this.oid = oid;
+	}
+	public String getMergeId() {
+		return mergeId;
+	}
+	public void setMergeId(String mergeId) {
+		this.mergeId = mergeId;
 	}
 	
 }

@@ -27,14 +27,15 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import mastery.model.Lesson;
 import mastery.model.Room;
 import mastery.model.Teacher;
+import mastery.schooltracs.json.deserializer.CustomersDeserializer;
+import mastery.schooltracs.json.deserializer.FacilitiesDeserializer;
+import mastery.schooltracs.json.deserializer.SearchResponseDeserializer;
 import mastery.schooltracs.model.Customer;
 import mastery.schooltracs.model.Facility;
 import mastery.schooltracs.model.SearchRequest;
 import mastery.schooltracs.model.SearchResponse;
-import mastery.schooltracs.util.FacilitiesDeserializer;
 import mastery.schooltracs.util.SchoolTracsConst;
 import mastery.schooltracs.util.SchoolTracsUtil;
-import mastery.schooltracs.util.SearchResponseDeserializer;
 import mastery.util.MasteryUtil;
 
 @Service
@@ -66,19 +67,22 @@ public class SchoolTracsAgent {
 	}
 	
 	//customer
-	public Customer schCustByName(String name){
+	public List<Customer> schCustsByPhone(String phone){
 		logger.info("Search Customer by Name Start");
+		
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-		nvps.add(new BasicNameValuePair("id", "784"));
+		nvps.add(new BasicNameValuePair("filter[0][field]", "phone"));
+		nvps.add(new BasicNameValuePair("filter[0][data][type]", "string"));
+		nvps.add(new BasicNameValuePair("filter[0][data][value]", phone));
+		nvps.add(new BasicNameValuePair("centerId", "2"));
+		nvps.add(new BasicNameValuePair("start", "0"));
+		
 		try {
-			String result = conn.sendCustReq(nvps);
-			Customer c = jsonToCust(result);
-			return c;
+			return jsonToCusts(conn.sendCustReq(nvps));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+		return new ArrayList<Customer>();
 	}
 
 	//make up
@@ -282,18 +286,20 @@ public class SchoolTracsAgent {
 
 	}
 	
-	private static Customer jsonToCust(String json) throws JsonParseException, JsonMappingException, IOException{
+	private static List<Customer> jsonToCusts(String json) throws JsonParseException, JsonMappingException, IOException{
 
 		logger.info("Json="+json);
 	
 		ObjectMapper mapper = new ObjectMapper();
+		CollectionType type = mapper.getTypeFactory().constructCollectionType(List.class,Facility.class);
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(List.class, new CustomersDeserializer());
+		mapper.registerModule(module);
 
-		Customer c = mapper.readValue(mapper.readTree(json).get("data").toString(), Customer.class);
-
-		return c;
+		return mapper.readValue(json, type);
 
 	}
-
+	
 	private static List<Room> jsonToRms(String json) throws JsonParseException, JsonMappingException, IOException{
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -323,10 +329,11 @@ public class SchoolTracsAgent {
 		Calendar edCal = MasteryUtil.getPlainCal(new Date());
 		edCal.add(Calendar.DAY_OF_MONTH, 7);
 		//List<Lesson> list = agent.schLsonByStd("K2李頌圻", stCal.getTime(), edCal.getTime());
-		Customer c = agent.schCustByName("K2李頌圻");
+		//logger.info(list.toString());
+		List<Customer> list = agent.schCustsByPhone("96841163");
 		
 		
-		logger.info(c.toString());
+		logger.info(list.toString());
 
 		/*if(list.size()>0){
 			Lesson l = list.get(0);

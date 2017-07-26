@@ -1,4 +1,4 @@
-package mastery.schooltracs.util;
+package mastery.schooltracs.json.deserializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
