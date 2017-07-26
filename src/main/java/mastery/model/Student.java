@@ -11,6 +11,7 @@ public class Student {
 	private String name;
 	private SchoolTracsConst.Level lvl;
 	private Boolean paid;
+	private Boolean isMakeup;
 	
 	public Student() {
 		super();
@@ -31,6 +32,10 @@ public class Student {
 		this.paid = true;
 		if(map.getPaid()==null){
 			this.paid=false;
+		}
+		this.isMakeup = false;
+		if(map.getMoveFromId()!=null){
+			this.isMakeup=true;
 		}
 	}
 	
@@ -62,9 +67,18 @@ public class Student {
 		this.paid = paid;
 	}
 
+	public Boolean getIsMakeup() {
+		return isMakeup;
+	}
+
+	public void setIsMakeup(Boolean isMakeup) {
+		this.isMakeup = isMakeup;
+	}
+
 	@Override
 	public String toString() {
-		return "Student [id=" + id + ", name=" + name + ", lvl=" + lvl + "]";
+		return "Student [id=" + id + ", name=" + name + ", lvl=" + lvl + ", paid=" + paid + ", isMakeup=" + isMakeup
+				+ "]";
 	}
 	
 }

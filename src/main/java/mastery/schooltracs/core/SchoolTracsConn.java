@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.http.Consts;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -19,6 +20,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -50,12 +52,12 @@ public class SchoolTracsConn {
 
 	public SchoolTracsConn() {
 		
-		/*HttpHost proxy = new HttpHost("judpocproxy.poc.et", 8080);
+		HttpHost proxy = new HttpHost("judpocproxy.poc.et", 8080);
 		DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
 		
-		httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).build();*/
+		httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).build();
 		
-		httpClient = HttpClientBuilder.create().build();
+		//httpClient = HttpClientBuilder.create().build();
 		localContext = HttpClientContext.create();
 		cookieStore = new BasicCookieStore();
 		localContext.setCookieStore(cookieStore);
@@ -87,6 +89,15 @@ public class SchoolTracsConn {
 
 	}
 	
+	public String sendCustReq(List<NameValuePair> nvps) throws ClientProtocolException, UnsupportedEncodingException, IOException{
+		logger.info("Send Customer Request");
+		
+		HttpResponse request = this.excuteClient(prepareHttpFormPost(SchoolTracsConst.CUST_REQ_URL, nvps));
+
+		return EntityUtils.toString(request.getEntity());
+		
+	}
+	
 	
 	public String sendFacReq() throws ClientProtocolException, IOException{
 		
@@ -116,8 +127,7 @@ public class SchoolTracsConn {
 	
 	public String sendNewMkupReq(Lesson l, String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{
 		
-		NewMakeupRequest req = new NewMakeupRequest(l);
-		req.setCustomerId(stdId);
+		NewMakeupRequest req = new NewMakeupRequest(reqSeq,l,stdId);
 		
 		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.TASK_REQ_URL, buildNewMakeupReqJson(req)));
 
@@ -133,7 +143,6 @@ public class SchoolTracsConn {
 	private static HttpPost prepareHttpJsonPost(String requestUrl, String payload) throws UnsupportedEncodingException{
 		HttpPost post = prepareHttpPost(requestUrl);
 		post.setHeader(HttpHeaders.CONTENT_TYPE, SchoolTracsConst.CONTENT_TYPE_JSON);
-		//post.setHeader(HttpHeaders.CONTENT_ENCODING, Consts.UTF_8.toString());
 		post.setEntity(new StringEntity(payload, Consts.UTF_8));
 		return post;
 	}

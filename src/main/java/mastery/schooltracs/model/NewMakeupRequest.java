@@ -31,7 +31,8 @@ public class NewMakeupRequest {
 	private String centerId;
 	private String customerId;
 	
-	public NewMakeupRequest(Lesson l){
+	public NewMakeupRequest(Integer reqSeq, Lesson l, String custId){
+		this.reqSeq = reqSeq;
 		this.task = SchoolTracsConst.Task.NEW_MAKE_UP.code();
 		this.startTime = l.getStartDateTime();
 		this.endTime = l.getEndDateTime();
@@ -40,6 +41,7 @@ public class NewMakeupRequest {
 		this.productId = "";
 		this.id = l.getId();
 		this.centerId = l.getCenterId();
+		this.customerId = custId;
 	}
 	
 	public Integer getReqSeq() {

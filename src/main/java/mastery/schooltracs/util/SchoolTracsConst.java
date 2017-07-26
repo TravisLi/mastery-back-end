@@ -15,18 +15,20 @@ public class SchoolTracsConst {
 	public static final String CONTENT_TYPE_FORM = "application/x-www-form-urlencoded; charset=UTF-8";
 	
 	public static final String LOGIN_URL = HOST_URL + "/app/login";
-	public static final String TASK_REQ_URL = HOST_URL + "/masteryoim/app/?v=&c=2";
-	public static final String FAC_REQ_URL = HOST_URL + "/masteryoim/app/facility/read";
+	public static final String REST_URL = HOST_URL + "/masteryoim/app";
+	public static final String TASK_REQ_URL = REST_URL + "/?v=&c=2";
+	public static final String FAC_REQ_URL = REST_URL + "/facility/read";
+	public static final String CUST_REQ_URL = REST_URL + "/customer/read";
 	
 	public static final SimpleDateFormat SDF_FULL = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	public static final SimpleDateFormat SDF_DATE = new SimpleDateFormat("yyyy-MM-dd");
-	public static final SimpleDateFormat SDF_TIME = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	public static final SimpleDateFormat SDF_TIME = new SimpleDateFormat("HH:mm");
 	
 	public enum Task{
 		
 		SEARCH_ACTIVITY("Activity.searchActivities"),
-		NEW_MAKE_UP("ActivityCustomer.newMakeup");
-		
+		NEW_MAKE_UP("ActivityCustomer.newMakeup"),
+		STAFF_WORK_HR("Staff.getWorkingHour");
 		private String code;
 		
 		Task(String code){

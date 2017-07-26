@@ -221,7 +221,7 @@ public class SchoolTracsUtil {
 					if(sHash.containsKey(l.getId())){
 						for(Student s: sHash.get(l.getId())){
 							l.getStudents().add(s);
-							if(!s.getPaid()){
+							if(!s.getPaid()&&!s.getIsMakeup()){
 								error = true;
 							}
 						}

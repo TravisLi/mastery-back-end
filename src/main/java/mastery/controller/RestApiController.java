@@ -69,7 +69,7 @@ public class RestApiController {
 	public ResponseEntity<List<Lesson>> findMkupLsons(@RequestBody Lesson lson, @PathVariable("stdName")String stdName){		
 		List<Lesson> list = new ArrayList<Lesson>();
 		
-		list = agent.schMkupCls(lson,stdName);
+		list = agent.schMkup(lson,stdName);
 		
 		logger.info(list.toString());
 		
