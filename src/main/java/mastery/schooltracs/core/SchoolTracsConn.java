@@ -53,12 +53,12 @@ public class SchoolTracsConn {
 
 	public SchoolTracsConn() {
 		
-		/*HttpHost proxy = new HttpHost("judpocproxy.poc.et", 8080);
+		HttpHost proxy = new HttpHost("judpocproxy.poc.et", 8080);
 		DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
 		
-		httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).build();*/
+		httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).build();
 		
-		httpClient = HttpClientBuilder.create().build();
+		//httpClient = HttpClientBuilder.create().build();
 		localContext = HttpClientContext.create();
 		cookieStore = new BasicCookieStore();
 		localContext.setCookieStore(cookieStore);
