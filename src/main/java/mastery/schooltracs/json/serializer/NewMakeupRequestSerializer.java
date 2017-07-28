@@ -7,13 +7,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-import mastery.schooltracs.model.MakeupRequest;
+import mastery.schooltracs.model.NewMakeupRequest;
 import mastery.schooltracs.util.SchoolTracsConst;
 
-public class MakeupRequestSerializer extends JsonSerializer<MakeupRequest> {
+public class NewMakeupRequestSerializer extends JsonSerializer<NewMakeupRequest> {
 	
 	@Override
-	public void serialize(MakeupRequest req, JsonGenerator jg, SerializerProvider sp)
+	public void serialize(NewMakeupRequest req, JsonGenerator jg, SerializerProvider sp)
 			throws IOException, JsonProcessingException {
 				
 		/*{

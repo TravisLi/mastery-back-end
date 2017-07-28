@@ -76,8 +76,8 @@ public class RestApiController {
 		//for demo purpose we date back to march
 		Calendar stCal = MasteryUtil.getPlainCal(new Date());
 		
-		stCal.set(Calendar.MONTH, 6);
-		stCal.set(Calendar.DAY_OF_MONTH,1);
+		//stCal.set(Calendar.MONTH, 6);
+		//stCal.set(Calendar.DAY_OF_MONTH,1);
 		
 		Calendar edCal = MasteryUtil.getPlainCal(stCal.getTime());
 		stCal.add(Calendar.DAY_OF_MONTH, (weekNo-1)*7);

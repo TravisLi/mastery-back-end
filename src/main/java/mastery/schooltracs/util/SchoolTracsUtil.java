@@ -20,146 +20,147 @@ import mastery.schooltracs.model.CustomerMap;
 import mastery.schooltracs.model.FacilityMap;
 import mastery.schooltracs.model.SearchResponse;
 import mastery.schooltracs.model.StaffMap;
+import mastery.util.MasteryUtil;
 
 public class SchoolTracsUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(SchoolTracsUtil.class);
-			
+
 	public static List<Lesson> findSimLvlLsonOfTch(final Lesson src, final String stdName, final int lvlGap, final List<Lesson> listByTch){
-		
+
 		logger.info("Find Similar Level Lessons of Teacher with lvlGap=" + lvlGap);
-		
+
 		List<Lesson> list = new ArrayList<Lesson>();
-		
+
 		logger.debug("Src Lesson="+src);
-		
+
 		Student master = null;
-		
+
 		for(Student s: src.getStudents()){
 			if(s.getName().equals(stdName)){
 				master = s;
 			}
 		}
-		
+
 		if(master == null){
 			return list;
 		}
-		
+
 		logger.info("master student id=" + master.getId());
 		logger.info("master student name=" + master.getName());
-		
+
 		for(Lesson l: listByTch){
-			
+
 			logger.debug("lesson by Teacher="+l.toString());
-			
-			boolean sameName = l.getName().equals(src.getName());
-			boolean sameFrLvl = l.getFrLvl().equals(src.getFrLvl());
-			boolean sameToLvl = l.getToLvl().equals(src.getToLvl());
-			
+
+			boolean sameName = MasteryUtil.nullGuard(l.getName()).equals(MasteryUtil.nullGuard(src.getName()));
+			boolean sameFrLvl = MasteryUtil.nullGuard(l.getFrLvl()).equals(MasteryUtil.nullGuard(src.getFrLvl()));
+			boolean sameToLvl = MasteryUtil.nullGuard(l.getToLvl()).equals(MasteryUtil.nullGuard(src.getToLvl()));
+
 			//the gap between two student meet the requirement
 			boolean meetLvl = true;
-			
+
 			boolean sameStd = false;
-			
+
 			for(Student s: l.getStudents()){
-				
+
 				if(master.getId().equals(s.getId())){
 					sameStd = true;
 				}
-				
-				int calGap = master.getLvl().code()-s.getLvl().code();
-				
+
+				int calGap = MasteryUtil.nullGuard(master.getLvl()).code()-MasteryUtil.nullGuard(s.getLvl()).code();
+
 				logger.debug("calGap="+Math.abs(calGap));
 				logger.debug("lvlGap="+lvlGap);
-				
+
 				//either one student not match forfeit
 				if(Math.abs(calGap) != lvlGap){
 					meetLvl = false;
 				}
-					
+
 			}
-						
+
 			logger.debug("sameName="+sameName);
 			logger.debug("sameFrLvl="+sameFrLvl);
 			logger.debug("sameToLvl="+sameToLvl);
 			logger.debug("meetlvl="+meetLvl);
 			logger.debug("sameStudent="+sameStd);
-			
+
 			if(sameName&&sameFrLvl&&sameToLvl&&meetLvl&&!sameStd){
 				logger.info("Lesson is added to list for return =" + l.toString());
 				list.add(l);
 			}
-			
+
 		}
-		
+
 		return list;
-		
+
 	}
-	
+
 	public static boolean isRmFullInPrd(Room r, Date startTime, Date endTime, List<Lesson> listByRoom){
-		
+
 		logger.info("Is Room Full In Period Start");
-		
+
 		logger.debug("Start Time="+startTime);
 		logger.debug("End Time="+endTime);
 		logger.debug("Room Cap="+r.getCap());
-		
+
 		final int minStep = 15;
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(startTime);
-		
+
 		Date cTime = cal.getTime();
-		
+
 		while(cTime.before(endTime)||cTime.equals(endTime)){
-			
+
 			logger.debug("Check Time="+cTime);
-			
+
 			int noOfStd = getNoOfStdInRmAtTime(cTime, listByRoom);
-			
+
 			logger.debug("No.of Studnet="+noOfStd);
-			
+
 			if(noOfStd>r.getCap()){
 				return true;
 			}
 			cal.add(Calendar.MINUTE, minStep);
 			cTime = cal.getTime();
 		}
-		
+
 		return false;
-		
+
 	}
-	
+
 	public static int getNoOfStdInRmAtTime(Date time, List<Lesson> listByRoom){
-		
+
 		logger.info("Get Student No At Time Start");
-		
+
 		int stdCnt = 0;
-		
+
 		for(Lesson l: listByRoom){
 			if(timeFallIntoTheMiddleOfLson(l,time)){
 				logger.info("lesson fall into middle" + l.toString());
 				stdCnt += l.getStudents().size();
 			}
 		}
-		
+
 		return stdCnt;
 	}
-	
+
 	private static boolean timeFallIntoTheMiddleOfLson(Lesson l, Date src){
-		
+
 		boolean gtEqStartTime = src.after(l.getStartDateTime())||src.equals(l.getStartDateTime());
 		boolean stEqEndTime = src.before(l.getEndDateTime())||src.equals(l.getEndDateTime());
-		
+
 		if(gtEqStartTime&&stEqEndTime){
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	public static SchoolTracsConst.Level classifyLevel(String lvl){
-		
-		switch(lvl){
+		if(lvl!=null){
+			switch(lvl){
 			case "P1":
 				return SchoolTracsConst.Level.P1;
 			case "P2":
@@ -186,42 +187,44 @@ public class SchoolTracsUtil {
 				return SchoolTracsConst.Level.S6;
 			default:
 				return SchoolTracsConst.Level.NONE;
+			}
 		}
+		return SchoolTracsConst.Level.NONE;
 	}
-	
+
 	public static List<Lesson> schRspToLson(SearchResponse sr){
-		
+
 		logger.info("Search Response to Lessons start");
-		
+
 		List<Lesson> list = new ArrayList<Lesson>();
-		
+
 		HashMap<String, Teacher> tHash = stfMapToActHash(sr.getStaffMaps());
 		HashMap<String, List<Student>> sHash = custMapToActHash(sr.getCustomerMaps());
 		HashMap<String, Room> rHash = facMapToActHash(sr.getFacilityMaps());
-		
+
 		for(Activity a: sr.getActivities()){
 			if(!a.getEnrolled().equals("0")){
 				boolean error = false;
 				try {  
 					logger.debug("Processing id:" + a.getId());
 					Lesson l = new Lesson(a);
-					
+
 					if(rHash.containsKey(l.getId())){
 						l.setRoom(rHash.get(l.getId()));
 					}else{
 						logger.info("Cannot find room");
 					}
-					
+
 					if(tHash.containsKey(l.getId())){
 						l.setTeacher(tHash.get(l.getId()));
 					}else{
 						logger.info("Cannot find teacher");
 					}
-					
+
 					if(sHash.containsKey(l.getId())){
 						for(Student s: sHash.get(l.getId())){
 							l.getStudents().add(s);
-							if(!s.getPaid()&&!s.getIsMakeup()){
+							if(!s.getPaid()&&!s.getIsMkup()){
 								error = true;
 							}
 						}
@@ -231,42 +234,42 @@ public class SchoolTracsUtil {
 					if(!error){
 						list.add(l);
 					}
-					
+
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		
+
 		list.sort(new Comparator<Lesson>(){
 
 			@Override
 			public int compare(Lesson o1, Lesson o2) {
-				
+
 				if(o1.getStartDateTime().before(o2.getStartDateTime())){
 					return -1;
 				}
-				
+
 				if(o1.getStartDateTime().equals(o2.getStartDateTime())){
 					return 0;
 				}
-				
+
 				if(o1.getStartDateTime().after(o2.getStartDateTime())){
 					return 1;
 				}
-				
+
 				return 0;
 			}
-			
+
 		});
-		
+
 		return list;
-		
+
 	}
-	
+
 	public static HashMap<String, Teacher> stfMapToActHash(List<StaffMap> list){
 		HashMap<String, Teacher> map = new HashMap<String, Teacher>();
-		
+
 		for(StaffMap sMap: list ){
 			Teacher t =  new Teacher(sMap);
 			if(map.containsKey(sMap.getActivityId())){
@@ -278,15 +281,15 @@ public class SchoolTracsUtil {
 			}else{
 				map.put(sMap.getActivityId(), t);
 			}
-			
+
 		}
-		
+
 		return map;
 	}
-	
+
 	public static HashMap<String, List<Student>> custMapToActHash(List<CustomerMap> list){
 		HashMap<String, List<Student>> map = new HashMap<String, List<Student>>();
-		
+
 		for(CustomerMap cMap: list){
 			Student s = new Student(cMap);
 			if(map.containsKey(cMap.getActivityId())){
@@ -296,15 +299,15 @@ public class SchoolTracsUtil {
 				tList.add(s);
 				map.put(cMap.getActivityId(), tList);
 			}
-			
+
 		}
-		
+
 		return map;
 	}
-	
+
 	public static HashMap<String, Room> facMapToActHash(List<FacilityMap> list){
 		HashMap<String, Room> map = new HashMap<String, Room>();
-		
+
 		for(FacilityMap fMap: list){
 			Room r = new Room(fMap);
 			if(map.containsKey(fMap.getActivityId())){
@@ -316,9 +319,9 @@ public class SchoolTracsUtil {
 			}else{
 				map.put(fMap.getActivityId(), r);
 			}
-			
+
 		}
-		
+
 		return map;
 	}
 }

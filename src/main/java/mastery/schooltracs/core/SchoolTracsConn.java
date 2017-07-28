@@ -33,9 +33,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import mastery.model.Lesson;
-import mastery.schooltracs.json.serializer.MakeupRequestSerializer;
+import mastery.schooltracs.json.serializer.NewMakeupRequestSerializer;
 import mastery.schooltracs.json.serializer.SearchRequestSerializer;
-import mastery.schooltracs.model.MakeupRequest;
+import mastery.schooltracs.model.NewMakeupRequest;
 import mastery.schooltracs.model.SearchRequest;
 import mastery.schooltracs.util.SchoolTracsConst;
 
@@ -53,12 +53,12 @@ public class SchoolTracsConn {
 
 	public SchoolTracsConn() {
 		
-		HttpHost proxy = new HttpHost("judpocproxy.poc.et", 8080);
+		/*HttpHost proxy = new HttpHost("judpocproxy.poc.et", 8080);
 		DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
 		
-		httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).build();
+		httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).build();*/
 		
-		//httpClient = HttpClientBuilder.create().build();
+		httpClient = HttpClientBuilder.create().build();
 		localContext = HttpClientContext.create();
 		cookieStore = new BasicCookieStore();
 		localContext.setCookieStore(cookieStore);
@@ -128,7 +128,7 @@ public class SchoolTracsConn {
 	
 	public String sendNewMkupReq(Lesson l, String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{
 		
-		MakeupRequest req = new MakeupRequest(reqSeq,l,stdId);
+		NewMakeupRequest req = new NewMakeupRequest(reqSeq,l,stdId);
 		
 		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.TASK_REQ_URL, buildNewMakeupReqJson(req)));
 
@@ -172,10 +172,10 @@ public class SchoolTracsConn {
 		return buildReqJson(module,req);
 	}
 	
-	private static String buildNewMakeupReqJson(MakeupRequest req) throws JsonProcessingException{
+	private static String buildNewMakeupReqJson(NewMakeupRequest req) throws JsonProcessingException{
 		
 		SimpleModule module = new SimpleModule();
-		module.addSerializer(MakeupRequest.class, new MakeupRequestSerializer());
+		module.addSerializer(NewMakeupRequest.class, new NewMakeupRequestSerializer());
 
 		return buildReqJson(module,req);
 	}

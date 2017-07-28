@@ -3,6 +3,8 @@ package mastery.util;
 import java.util.Calendar;
 import java.util.Date;
 
+import mastery.schooltracs.util.SchoolTracsConst;
+
 public class MasteryUtil {
 
 	public static Calendar getPlainCal(Date date){
@@ -15,4 +17,11 @@ public class MasteryUtil {
 		return cal;
 	}
 	
+	public static String nullGuard(String src){
+		return src!=null?src:"";
+	}
+	
+	public static SchoolTracsConst.Level nullGuard(SchoolTracsConst.Level src){
+		return src!=null?src:SchoolTracsConst.Level.NONE;
+	}
 }

@@ -55,6 +55,9 @@ public class Lesson {
 		if(lvls.length==2){
 			frLvl = SchoolTracsUtil.classifyLevel(lvls[0]);
 			toLvl = SchoolTracsUtil.classifyLevel(lvls[1]);
+		}else{
+			frLvl = SchoolTracsConst.Level.NONE;
+			toLvl = SchoolTracsConst.Level.NONE;
 		}
 		
 		String startDateStr = act.getDate() + " " + act.getStartTime();
