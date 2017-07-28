@@ -28,6 +28,7 @@ public class SchoolTracsConst {
 		
 		SEARCH_ACTIVITY("Activity.searchActivities"),
 		NEW_MAKE_UP("ActivityCustomer.newMakeup"),
+		EXIST_MAKE_UP("ActivityCustomer.makeup"),
 		STAFF_WORK_HR("Staff.getWorkingHour");
 		private String code;
 		

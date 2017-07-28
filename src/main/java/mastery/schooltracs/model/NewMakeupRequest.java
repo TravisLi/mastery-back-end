@@ -20,6 +20,22 @@ public class NewMakeupRequest {
 	 * "centerId":"2",
 	 * "customerId":[813]}]}*/
 	
+	/*{"75 ":[
+	 * "ActivityCustomer.newMakeUp",
+	 * {"date":"2017-08-11",
+	 * "startTime":"11:00",
+	 * "endTime":"12:30",
+	 * "staffId":"90",
+	 * "facilityId":"1",
+	 * "productId":"",
+	 * "id":416206,
+	 * "centerId":"2",
+	 * "customerId":[813],
+	 * "extra":{
+	 * "ignore":{
+	 * "resource":true}
+	 * }}]}*/
+	
 	private Integer reqSeq;
 	private String task;
 	private Date startTime;
@@ -30,6 +46,8 @@ public class NewMakeupRequest {
 	private String id;
 	private String centerId;
 	private String customerId;
+	//extra option
+	private Boolean ignResrc;
 	
 	public NewMakeupRequest(Integer reqSeq, Lesson l, String custId){
 		this.reqSeq = reqSeq;
@@ -103,6 +121,14 @@ public class NewMakeupRequest {
 	}
 	public void setCustomerId(String customerId) {
 		this.customerId = customerId;
+	}
+
+	public Boolean getIgnResrc() {
+		return ignResrc;
+	}
+
+	public void setIgnResrc(Boolean ignResrc) {
+		this.ignResrc = ignResrc;
 	}
 	
 	

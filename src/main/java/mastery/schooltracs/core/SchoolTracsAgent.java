@@ -17,8 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -26,6 +28,7 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 
 import mastery.model.Lesson;
 import mastery.model.Room;
+import mastery.model.Student;
 import mastery.model.Teacher;
 import mastery.schooltracs.json.deserializer.CustomersDeserializer;
 import mastery.schooltracs.json.deserializer.FacilitiesDeserializer;
@@ -89,22 +92,37 @@ public class SchoolTracsAgent {
 	public Boolean aplyMkup(Lesson l, String stdId){
 		logger.info("Apply Makeup class start");
 
+		
 		String result;
 		try {
-			result = conn.sendNewMkupReq(l, stdId);
-			logger.debug(result);
+			if(l.getId()!=null){
+				result = conn.sendNewMkupReq(l, stdId);
+				logger.debug(result);
+			}else{
+				
+				String stdLsonId = null;
+				for(Student s: l.getStudents()){
+					if(s.getId().equals(stdId)){
+						stdLsonId = s.getStdLsonId();
+					}
+				}
+				
+				result = conn.sendExtMkupReq(l.getId(), stdLsonId);
+				logger.debug(result);
+			}
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		}
-
+		
 		if(result.contains("Exception")){
 			return false;
 		}
 		return true;
 	}
-
+	
 	public List<Lesson> schMkup(Lesson src, String stdName){
 
 		logger.info("Search For Makeup Class Start");
@@ -321,7 +339,7 @@ public class SchoolTracsAgent {
 	}
 
 	public static void main(String[] args) throws IOException{
-		SchoolTracsAgent agent = new SchoolTracsAgent();
+		/*SchoolTracsAgent agent = new SchoolTracsAgent();
 		agent.uname = "travisli@masteryoim";
 		agent.pwd = "24643466";
 		agent.init();
@@ -333,8 +351,20 @@ public class SchoolTracsAgent {
 		List<Customer> list = agent.schCustsByPhone("96841163");
 		
 		
-		logger.info(list.toString());
+		logger.info(list.toString());*/
+		
+		String str = "{\"9 \":{\"type\":\"Exception\",\"message\":\"Resource conflicts occurs\",\"code\":101,\"data\":[{\"date\":\"2017-07-28\",\"time\":\"11:00:00\",\"activity2\":\"\u78a9\u58eb\u82f1\u6587\u73ed (\u6bcf\u9031\u4e00\u5802)\",\"level2\":\"S1-S3\",\"activityId2\":\"416135\",\"activity1\":\"1:1 \u78a9\u58eb\u4e2d\u6587\u73ed (\u6bcf\u9031\u4e00\u5802)\",\"level1\":\"P1-P6\",\"activityId1\":\"416486\",\"name\":\"G20B(9)\",\"type\":\"F\"},{\"date\":\"2017-07-28\",\"time\":\"11:00:00\",\"activity2\":\"\u78a9\u58eb\u82f1\u6587\u73ed (\u6bcf\u9031\u4e00\u5802)\",\"level2\":\"S1-S3\",\"activityId2\":\"408008\",\"activity1\":\"1:1 \u78a9\u58eb\u4e2d\u6587\u73ed (\u6bcf\u9031\u4e00\u5802)\",\"level1\":\"P1-P6\",\"activityId1\":\"416486\",\"name\":\"G20B(9)\",\"type\":\"F\"}]}}";
+		
+		JsonFactory factory = new JsonFactory();
+		JsonParser  parser  = factory.createParser(str);
 
+		while(!parser.isClosed()){
+		    JsonToken jsonToken = parser.nextToken();
+		    parser.getCurrentName().equals("type");
+		    System.out.println("p = " + parser.getText());
+		    //System.out.println("jsonToken = " + jsonToken.toString());
+		}
+		
 		/*if(list.size()>0){
 			Lesson l = list.get(0);
 			Calendar start = Calendar.getInstance();

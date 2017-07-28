@@ -1,34 +1,78 @@
 package mastery.schooltracs.model;
 
-import java.util.Date;
-
 import mastery.model.Lesson;
-import mastery.schooltracs.util.SchoolTracsConst;
+import mastery.schooltracs.util.SchoolTracsConst.Task;
 
 public class ExistMakeupRequest {
 
-	/*{
-	 * "14 ":[
-	 * "ActivityCustomer.newMakeUp",{
-	 * "date":"2017-08-07",
-	 * "startTime":"10:45",
-	 * "endTime":"11:45",
-	 * "staffId":"22",
-	 * "facilityId":"3",
-	 * "productId":"",
-	 * "id":412610,
-	 * "centerId":"2",
-	 * "customerId":[813]}]}*/
+	/* {
+	 * "15 ":
+	 * ["ActivityCustomer.makeUp",
+	 * "401005",
+	 * [482327],
+	 * 0,
+	 * null]}*/
 	
 	private Integer reqSeq;
 	private String task;
 	private String toLsonId;
-	private String fromLsonId;
+	private String stdLsonId;
 	private String unknownNo;
 	private String unknownStr;
 	
-	
-	
-	
+	public ExistMakeupRequest(Integer reqSeq, String toLsonId, String stdLsonId){
+		this.reqSeq = reqSeq;
+		this.task = Task.EXIST_MAKE_UP.code();
+		this.toLsonId = toLsonId;
+		this.stdLsonId = stdLsonId;
+	}
+
+	public Integer getReqSeq() {
+		return reqSeq;
+	}
+
+	public void setReqSeq(Integer reqSeq) {
+		this.reqSeq = reqSeq;
+	}
+
+	public String getTask() {
+		return task;
+	}
+
+	public void setTask(String task) {
+		this.task = task;
+	}
+
+	public String getToLsonId() {
+		return toLsonId;
+	}
+
+	public void setToLsonId(String toLsonId) {
+		this.toLsonId = toLsonId;
+	}
+
+	public String getStdLsonId() {
+		return stdLsonId;
+	}
+
+	public void setStdLsonId(String stdLsonId) {
+		this.stdLsonId = stdLsonId;
+	}
+
+	public String getUnknownNo() {
+		return unknownNo;
+	}
+
+	public void setUnknownNo(String unknownNo) {
+		this.unknownNo = unknownNo;
+	}
+
+	public String getUnknownStr() {
+		return unknownStr;
+	}
+
+	public void setUnknownStr(String unknownStr) {
+		this.unknownStr = unknownStr;
+	}
 	
 }

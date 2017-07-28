@@ -28,6 +28,22 @@ public class NewMakeupRequestSerializer extends JsonSerializer<NewMakeupRequest>
 		 * "id":412610,
 		 * "centerId":"2",
 		 * "customerId":[813]}]} */
+		
+		/*{"75 ":[
+		 * "ActivityCustomer.newMakeUp",
+		 * {"date":"2017-08-11",
+		 * "startTime":"11:00",
+		 * "endTime":"12:30",
+		 * "staffId":"90",
+		 * "facilityId":"1",
+		 * "productId":"",
+		 * "id":416206,
+		 * "centerId":"2",
+		 * "customerId":[813],
+		 * "extra":{
+		 * "ignore":{
+		 * "resource":true}
+		 * }}]}*/
 				
 		jg.writeStartObject();
 		jg.writeFieldName(Integer.toString(req.getReqSeq()) + " ");
@@ -48,6 +64,15 @@ public class NewMakeupRequestSerializer extends JsonSerializer<NewMakeupRequest>
 		jg.writeArrayFieldStart("customerId");
 		jg.writeNumber(req.getCustomerId()!=null?Integer.parseInt(req.getCustomerId()):0);
 		jg.writeEndArray();
+		
+		if(req.getIgnResrc()){
+			jg.writeObjectFieldStart("extra");
+			jg.writeObjectFieldStart("ignore");
+			jg.writeBooleanField("resource", req.getIgnResrc());
+			jg.writeEndObject();
+			jg.writeEndObject();
+		}
+		
 		jg.writeEndObject();
 		jg.writeEndArray();
 		jg.writeEndObject();

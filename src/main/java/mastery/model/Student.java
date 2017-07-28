@@ -8,6 +8,7 @@ import mastery.schooltracs.util.SchoolTracsConst.Level;
 public class Student {
 	
 	private String id;
+	private String stdLsonId;
 	private String name;
 	private SchoolTracsConst.Level lvl;
 	private Boolean paid;
@@ -27,6 +28,7 @@ public class Student {
 
 	public Student(CustomerMap map){
 		this.id = map.getCustomerId();
+		this.stdLsonId = map.getId();
 		this.name = map.getName();
 		this.lvl = SchoolTracsUtil.classifyLevel(map.getLevel());
 		this.paid = true;
@@ -45,6 +47,14 @@ public class Student {
 	public void setId(String id) {
 		this.id = id;
 	}
+	public String getStdLsonId() {
+		return stdLsonId;
+	}
+
+	public void setStdLsonId(String stdLsonId) {
+		this.stdLsonId = stdLsonId;
+	}
+
 	public String getName() {
 		return name;
 	}
