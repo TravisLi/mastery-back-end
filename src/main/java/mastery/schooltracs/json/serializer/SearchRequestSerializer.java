@@ -8,13 +8,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-import mastery.schooltracs.model.SearchRequest;
+import mastery.schooltracs.model.SearchActivityRequest;
 import mastery.schooltracs.util.SchoolTracsConst;
 
-public class SearchRequestSerializer extends JsonSerializer<SearchRequest> {
+public class SearchRequestSerializer extends JsonSerializer<SearchActivityRequest> {
 	
 	@Override
-	public void serialize(SearchRequest req, JsonGenerator jg, SerializerProvider sp)
+	public void serialize(SearchActivityRequest req, JsonGenerator jg, SerializerProvider sp)
 			throws IOException, JsonProcessingException {
 				
 		/*{"6 ":
@@ -42,7 +42,7 @@ public class SearchRequestSerializer extends JsonSerializer<SearchRequest> {
 		
 		jg.writeStartObject();
 		
-		for(Field f: SearchRequest.ContentOpt.class.getDeclaredFields()){
+		for(Field f: SearchActivityRequest.ContentOpt.class.getDeclaredFields()){
 			try {
 				f.setAccessible(true);
 				jg.writeBooleanField(f.getName(), (Boolean) f.get(req.getContentOpt()));

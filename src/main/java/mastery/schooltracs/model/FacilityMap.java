@@ -6,6 +6,8 @@ public class FacilityMap {
 	private String facilityId;
 	private String name;
 	private String remark;
+	private String capacity;
+	
 	public String getActivityId() {
 		return activityId;
 	}
@@ -29,6 +31,12 @@ public class FacilityMap {
 	}
 	public void setRemark(String remark) {
 		this.remark = remark;
+	}
+	public String getCapacity() {
+		return capacity;
+	}
+	public void setCapacity(String capacity) {
+		this.capacity = capacity;
 	}
 	
 }

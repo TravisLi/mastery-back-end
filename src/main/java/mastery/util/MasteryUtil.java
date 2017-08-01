@@ -17,6 +17,19 @@ public class MasteryUtil {
 		return cal;
 	}
 	
+	public static Date copyDate(Date stDate, Date src){
+		Calendar srcCal = Calendar.getInstance();
+		srcCal.setTime(src);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(stDate);
+		
+		cal.set(Calendar.YEAR, srcCal.get(Calendar.YEAR));
+		cal.set(Calendar.MONTH, srcCal.get(Calendar.MONTH));
+		cal.set(Calendar.DAY_OF_MONTH, srcCal.get(Calendar.DAY_OF_MONTH));
+		
+		return cal.getTime();
+	}
+	
 	public static String nullGuard(String src){
 		return src!=null?src:"";
 	}

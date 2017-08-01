@@ -20,10 +20,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import mastery.schooltracs.model.Activity;
 import mastery.schooltracs.model.CustomerMap;
 import mastery.schooltracs.model.FacilityMap;
-import mastery.schooltracs.model.SearchResponse;
+import mastery.schooltracs.model.SearchActivityResponse;
 import mastery.schooltracs.model.StaffMap;
 
-public class SearchResponseDeserializer extends JsonDeserializer<SearchResponse> {
+public class SearchResponseDeserializer extends JsonDeserializer<SearchActivityResponse> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SearchResponseDeserializer.class);
 	private static final String ACT_KEY = "activities";
@@ -32,10 +32,10 @@ public class SearchResponseDeserializer extends JsonDeserializer<SearchResponse>
 	private static final String FAC_KEY = "facilityMap";
 	
 	@Override
-	public SearchResponse deserialize(JsonParser p, DeserializationContext ctxt)
+	public SearchActivityResponse deserialize(JsonParser p, DeserializationContext ctxt)
 			throws IOException, JsonProcessingException {
 		
-		SearchResponse sr = new SearchResponse();
+		SearchActivityResponse sr = new SearchActivityResponse();
 
 		do{
 			p.nextToken();

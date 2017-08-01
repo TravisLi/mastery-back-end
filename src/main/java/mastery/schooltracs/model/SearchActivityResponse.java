@@ -2,7 +2,7 @@ package mastery.schooltracs.model;
 
 import java.util.List;
 
-public class SearchResponse {
+public class SearchActivityResponse {
 
 	/*{"7 ":{
 	"activities":[],

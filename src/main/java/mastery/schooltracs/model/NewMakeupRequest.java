@@ -47,7 +47,7 @@ public class NewMakeupRequest {
 	private String centerId;
 	private String customerId;
 	//extra option
-	private Boolean ignResrc;
+	private Boolean ignResrc = false;
 	
 	public NewMakeupRequest(Integer reqSeq, Lesson l, String custId){
 		this.reqSeq = reqSeq;
@@ -61,7 +61,7 @@ public class NewMakeupRequest {
 		this.centerId = l.getCenterId();
 		this.customerId = custId;
 	}
-	
+		
 	public Integer getReqSeq() {
 		return reqSeq;
 	}

@@ -33,9 +33,11 @@ import mastery.model.Lesson;
 import mastery.schooltracs.json.serializer.ExistMakeupRequestSerializer;
 import mastery.schooltracs.json.serializer.NewMakeupRequestSerializer;
 import mastery.schooltracs.json.serializer.SearchRequestSerializer;
+import mastery.schooltracs.json.serializer.StaffWorkHourRequestSerializer;
 import mastery.schooltracs.model.ExistMakeupRequest;
 import mastery.schooltracs.model.NewMakeupRequest;
-import mastery.schooltracs.model.SearchRequest;
+import mastery.schooltracs.model.SearchActivityRequest;
+import mastery.schooltracs.model.StaffWorkHourRequest;
 import mastery.schooltracs.util.SchoolTracsConst;
 
 public class SchoolTracsConn {
@@ -115,9 +117,9 @@ public class SchoolTracsConn {
 
 	}
 
-	public String sendSchReq(String searchStr, Date fromDate, Date toDate, String displayMode, SearchRequest.ContentOpt contentOpt) throws ClientProtocolException, IOException{
+	public String sendSchReq(String searchStr, Date fromDate, Date toDate, String displayMode, SearchActivityRequest.ContentOpt contentOpt) throws ClientProtocolException, IOException{
 
-		SearchRequest req = new SearchRequest(reqSeq,SchoolTracsConst.Task.SEARCH_ACTIVITY.code(),displayMode,searchStr,fromDate,toDate,"",contentOpt);
+		SearchActivityRequest req = new SearchActivityRequest(reqSeq,SchoolTracsConst.Task.SEARCH_ACTIVITY.code(),displayMode,searchStr,fromDate,toDate,"",contentOpt);
 
 		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.TASK_REQ_URL, buildSchReqJson(req)));
 
@@ -125,21 +127,34 @@ public class SchoolTracsConn {
 
 	}
 
-	public String sendNewMkupReq(Lesson l, String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{
+	public String sendNewMkupReq(Lesson l, String stdId, Boolean ignResrc) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{
 
 		NewMakeupRequest req = new NewMakeupRequest(reqSeq,l,stdId);
+		if(ignResrc){
+			req.setIgnResrc(true);
+		}
 
 		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.TASK_REQ_URL, buildNewMkupReqJson(req)));
 
 		return EntityUtils.toString(request.getEntity());
 
 	}
-	
+		
 	public String sendExtMkupReq(String toLsonId, String stdLsonId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{
 
 		ExistMakeupRequest req = new ExistMakeupRequest(reqSeq,toLsonId,stdLsonId);
 
 		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.TASK_REQ_URL, buildExtMkupReqJson(req)));
+
+		return EntityUtils.toString(request.getEntity());
+
+	}
+	
+	public String sendStfWkhrReq(String stfId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{
+
+		StaffWorkHourRequest req = new StaffWorkHourRequest(reqSeq,stfId);
+
+		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.TASK_REQ_URL, buildStfWkhrReqJson(req)));
 
 		return EntityUtils.toString(request.getEntity());
 
@@ -173,10 +188,10 @@ public class SchoolTracsConn {
 		return post;
 	}
 
-	private static String buildSchReqJson(SearchRequest req) throws JsonProcessingException{
+	private static String buildSchReqJson(SearchActivityRequest req) throws JsonProcessingException{
 
 		SimpleModule module = new SimpleModule();
-		module.addSerializer(SearchRequest.class, new SearchRequestSerializer());
+		module.addSerializer(SearchActivityRequest.class, new SearchRequestSerializer());
 
 		return buildReqJson(module,req);
 	}
@@ -193,6 +208,14 @@ public class SchoolTracsConn {
 
 		SimpleModule module = new SimpleModule();
 		module.addSerializer(ExistMakeupRequest.class, new ExistMakeupRequestSerializer());
+
+		return buildReqJson(module,req);
+	}
+	
+	private static String buildStfWkhrReqJson(StaffWorkHourRequest req) throws JsonProcessingException{
+
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(StaffWorkHourRequest.class, new StaffWorkHourRequestSerializer());
 
 		return buildReqJson(module,req);
 	}

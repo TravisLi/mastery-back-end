@@ -17,7 +17,7 @@ import java.util.Date;
  * {}]}
  * */
 
-public class SearchRequest {
+public class SearchActivityRequest {
 
 	private Integer reqSeq;
 	private String task;
@@ -34,7 +34,7 @@ public class SearchRequest {
 	private String unknownStr3;
 	private Object unknownObj; 
 	
-	public SearchRequest(){
+	public SearchActivityRequest(){
 		
 		unknownStr1 = "2";
 		contentOpt = new ContentOpt();
@@ -46,7 +46,7 @@ public class SearchRequest {
 		
 	}
 	
-	public SearchRequest(Integer reqSeq, String task, String displayMode, String searchStr, 
+	public SearchActivityRequest(Integer reqSeq, String task, String displayMode, String searchStr, 
 			Date fromDate, Date toDate, String timeslot, ContentOpt contentOpt){
 		
 		this();

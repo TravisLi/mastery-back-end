@@ -109,10 +109,26 @@ public class RestApiController {
 		return new ResponseEntity<List<Lesson>>(list, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/mkup/apply/{stdId}", method = RequestMethod.POST)
-	public ResponseEntity<Boolean> applyMkupLsons(@RequestBody Lesson lson, @PathVariable("stdId")String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
+	@RequestMapping(value = "/mkup/apply/new/{stdId}", method = RequestMethod.POST)
+	public ResponseEntity<Boolean> applyMkupLsons(@RequestBody Lesson toLson, @PathVariable("stdId")String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
 		
-		Boolean result = agent.aplyMkup(lson,stdId);
+		logger.info("Lesson=" + toLson);
+		logger.info("stdId=" + stdId);
+		
+		Boolean result = agent.aplyNewMkup(toLson,stdId);
+		
+		logger.info(result.toString());
+		
+		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/mkup/apply/exist/{frLsonId}", method = RequestMethod.POST)
+	public ResponseEntity<Boolean> applyExtMkupLsons(@RequestBody Lesson toLson, @PathVariable("frLsonId")String frLsonId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
+		
+		logger.info("Lesson=" + toLson);
+		logger.info("frLsonId=" + frLsonId);
+		
+		Boolean result = agent.aplyExtMkup(toLson,frLsonId);
 		
 		logger.info(result.toString());
 		

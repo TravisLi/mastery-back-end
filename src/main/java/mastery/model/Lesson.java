@@ -13,7 +13,7 @@ import mastery.schooltracs.util.SchoolTracsConst;
 import mastery.schooltracs.util.SchoolTracsConst.Level;
 import mastery.schooltracs.util.SchoolTracsUtil;
 
-public class Lesson {
+public class Lesson implements Comparable<Lesson>  {
 	
 	private static final Logger logger = LoggerFactory.getLogger(Lesson.class);
 	
@@ -31,6 +31,18 @@ public class Lesson {
 	
 	public Lesson() {
 		super();
+	}
+	
+	public Lesson(Lesson l){
+		this.name = l.getName();
+		this.frLvl = l.getFrLvl();
+		this.toLvl = l.getToLvl();
+		this.startDateTime = l.getStartDateTime();
+		this.endDateTime = l.getEndDateTime();
+		this.centerId = l.getCenterId();
+		this.room = l.getRoom();
+		this.teacher = l.getTeacher();
+		//this.students = l.getStudents();
 	}
 
 	public Lesson(String id, String name, Level frLvl, Level toLvl, Date startDateTime, Date endDateTime,
@@ -151,12 +163,29 @@ public class Lesson {
 	public void setStudents(List<Student> students) {
 		this.students = students;
 	}
+	
+	public Integer duration(){
+		return SchoolTracsUtil.minDiffBtwDates(startDateTime, endDateTime);
+	}
 
 	@Override
 	public String toString() {
 		return "Lesson [id=" + id + ", name=" + name + ", frLvl=" + frLvl + ", toLvl=" + toLvl + ", startDateTime="
 				+ startDateTime + ", endDateTime=" + endDateTime + ", teacher=" + teacher + ", students=" + students
 				+ ", room=" + room + "]";
+	}
+
+	@Override
+	public int compareTo(Lesson l) {
+		if(this.startDateTime.before(l.getStartDateTime())){
+			return -1;
+		}
+		
+		if(this.startDateTime.after(l.getStartDateTime())){
+			return 1;
+		}
+		
+		return 0;
 	}
 
 }

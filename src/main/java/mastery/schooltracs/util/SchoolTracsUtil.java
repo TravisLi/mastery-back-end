@@ -3,6 +3,7 @@ package mastery.schooltracs.util;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,15 +12,18 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import mastery.model.FreeTimeslot;
 import mastery.model.Lesson;
 import mastery.model.Room;
 import mastery.model.Student;
 import mastery.model.Teacher;
+import mastery.model.WorkHour;
 import mastery.schooltracs.model.Activity;
 import mastery.schooltracs.model.CustomerMap;
 import mastery.schooltracs.model.FacilityMap;
-import mastery.schooltracs.model.SearchResponse;
+import mastery.schooltracs.model.SearchActivityResponse;
 import mastery.schooltracs.model.StaffMap;
+import mastery.schooltracs.model.StaffWorkHour;
 import mastery.util.MasteryUtil;
 
 public class SchoolTracsUtil {
@@ -191,8 +195,22 @@ public class SchoolTracsUtil {
 		}
 		return SchoolTracsConst.Level.NONE;
 	}
+	
+	public static HashMap<Integer, WorkHour> stfWkHrToMap(List<StaffWorkHour> list){
+		logger.info("Staff Working Hour to Map start");
+		HashMap<Integer, WorkHour> map = new HashMap<Integer, WorkHour>();
+		for(StaffWorkHour s: list){
+			if(s.getOnDuty()){
 
-	public static List<Lesson> schRspToLson(SearchResponse sr){
+				WorkHour w = new WorkHour(s);
+				map.put(w.getWeekDay(), w);
+				logger.info("Work Hour=" + w.toString());
+			}
+		}
+		return map;
+	}
+
+	public static List<Lesson> schRspToLson(SearchActivityResponse sr){
 
 		logger.info("Search Response to Lessons start");
 
@@ -241,27 +259,7 @@ public class SchoolTracsUtil {
 			}
 		}
 
-		list.sort(new Comparator<Lesson>(){
-
-			@Override
-			public int compare(Lesson o1, Lesson o2) {
-
-				if(o1.getStartDateTime().before(o2.getStartDateTime())){
-					return -1;
-				}
-
-				if(o1.getStartDateTime().equals(o2.getStartDateTime())){
-					return 0;
-				}
-
-				if(o1.getStartDateTime().after(o2.getStartDateTime())){
-					return 1;
-				}
-
-				return 0;
-			}
-
-		});
+		Collections.sort(list);
 
 		return list;
 
@@ -324,4 +322,114 @@ public class SchoolTracsUtil {
 
 		return map;
 	}
+	
+	public static Integer lsonDuration(Lesson l){
+		return  minDiffBtwDates(l.getStartDateTime(),l.getEndDateTime());
+	}
+	
+	public static Integer minDiffBtwDates(Date d1, Date d2){
+		Long diff = Math.abs(d1.getTime() - d2.getTime())/1000/60;
+		return diff.intValue() ;
+	}
+	
+	public static HashMap<Date, List<Lesson>> lsonsToDateMap(List<Lesson> list){
+		HashMap<Date, List<Lesson>> map = new HashMap<Date,List<Lesson>>();
+		
+		for(Lesson l:list){
+			Date date = MasteryUtil.getPlainCal(l.getStartDateTime()).getTime();
+			if(map.containsKey(date)){
+				map.get(date).add(l);
+			}else{
+				List<Lesson> newList = new ArrayList<Lesson>();
+				newList.add(l);
+				map.put(date, newList);
+			}
+		}
+		
+		return map;
+	}
+	
+	public static List<FreeTimeslot> findFreeTimeSlotPerDate(List<Lesson> lsons, WorkHour wkhr, Date date){
+		
+		logger.info("Find free timeslot per date");
+		
+		logger.debug("Date="+ SchoolTracsConst.SDF_FULL.format(date));
+		
+		List<FreeTimeslot> list = new ArrayList<FreeTimeslot>();
+		
+		Date wkhrStDate = MasteryUtil.copyDate(wkhr.getStTime(), date);
+		Date wkhrEdDate = MasteryUtil.copyDate(wkhr.getEdTime(), date);
+		
+		logger.debug("Wkhr start Date="+ SchoolTracsConst.SDF_FULL.format(wkhrStDate));
+		logger.debug("Wkhr end Date="+ SchoolTracsConst.SDF_FULL.format(wkhrEdDate));
+		
+		Date stComp = wkhrStDate;
+		
+		if(lsons.size()==0){
+			list.add(new FreeTimeslot(wkhrStDate, wkhrEdDate));
+			return list;
+		}
+		
+		boolean isAllLsonBeforeWkhr = true;
+		
+		for(int i=0;i<lsons.size();i++){
+			
+			Lesson l = lsons.get(i);
+			
+			logger.debug("Lesson l = " + l.toString());
+			
+			if(l.getStartDateTime().after(wkhrStDate)||l.getStartDateTime().equals(wkhrStDate)){
+				isAllLsonBeforeWkhr = false;
+				FreeTimeslot t1 = new FreeTimeslot();
+				Date startDateTime = new Date();
+				startDateTime.setTime(stComp.getTime());
+				t1.setStartDateTime(startDateTime);
+				logger.debug("start Date time="+ SchoolTracsConst.SDF_FULL.format(startDateTime));
+				if(l.getStartDateTime().before(stComp) || l.getStartDateTime().equals(stComp)){
+					t1.setStartDateTime(l.getEndDateTime());
+				}else{
+					logger.debug("free timesolt add");
+					t1.setEndDateTime(l.getStartDateTime());
+					logger.debug("t1=" + t1);
+					list.add(t1);
+					stComp = l.getEndDateTime();
+				}
+				
+				if(i == lsons.size()-1){
+					if(l.getEndDateTime().before(wkhrEdDate)){
+						logger.debug("free timesolt add");
+						FreeTimeslot t2 = new FreeTimeslot();
+						t2.setStartDateTime(l.getEndDateTime());
+						t2.setEndDateTime(wkhrEdDate);
+						logger.debug("t2=" + t2);
+						list.add(t2);
+					}
+				}
+			}	
+		}
+		
+		if(isAllLsonBeforeWkhr){
+			list.add(new FreeTimeslot(wkhrStDate, wkhrEdDate));
+		}
+		
+		return list;
+		
+	}
+	
+	public static void comp(FreeTimeslot t, Lesson l, WorkHour wkhr){
+		//no time slot is assign
+		if(t.getStartDateTime()==null){
+			t.setStartDateTime(wkhr.getStTime());
+		}else{
+			if(l.getStartDateTime().before(t.getStartDateTime()) || l.getStartDateTime().equals(t.getStartDateTime())){
+				t.setStartDateTime(l.getEndDateTime());
+			}else{
+				t.setEndDateTime(l.getStartDateTime());
+			}
+		}
+		
+		
+		
+	}
+	
 }
