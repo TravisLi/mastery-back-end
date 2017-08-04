@@ -67,31 +67,54 @@ public class RestApiController {
 		return null;
 		
 	}
+	@RequestMapping(value = "/user/updatepwd/{custId}/{oldPwd}/{newPwd}", method = RequestMethod.GET)
+	public ResponseEntity<Boolean> updateUserPwd(@PathVariable("custId")String custId, @PathVariable("oldPwd")String oldPwd, @PathVariable("newPwd")String newPwd){
+		logger.info("Update User Password");
+		
+		List<Customer> custs = agent.schCustsById(custId);
+		
+		if(custs.isEmpty() || custs.size() > 1){
+			logger.info("More than one or no customer is found");
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		}
+		
+		Customer c = custs.get(0);
+		
+		if(!c.getBarCode().equals(oldPwd)){
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		}
+		
+		Customer cust = new Customer();
+		cust.setId(c.getId());
+		cust.setBarCode(newPwd);
+		
+		return new ResponseEntity<Boolean>(agent.updateCustInfo(cust), HttpStatus.OK);
+		
+	}
 	
 	
 	@RequestMapping(value = "/lesson/student/{name}/{weekNo}", method = RequestMethod.GET)
 	public ResponseEntity<List<Lesson>> getStdLsons(@PathVariable("name")String name, @PathVariable("weekNo")Integer weekNo){
 		logger.info("Get Student Lesson Start");
 		logger.info("name="+name+" weekNo="+weekNo);
+		
 		//for demo purpose we date back to march
-		Calendar stCal = MasteryUtil.getPlainCal(new Date());
-		
-		//stCal.set(Calendar.MONTH, 6);
-		//stCal.set(Calendar.DAY_OF_MONTH,1);
-		
+		Calendar stCal = MasteryUtil.getPlainCal(new Date());		
 		Calendar edCal = MasteryUtil.getPlainCal(stCal.getTime());
+		
+		//get a week of class
 		stCal.add(Calendar.DAY_OF_MONTH, (weekNo-1)*7);
-		edCal.add(Calendar.DAY_OF_MONTH, weekNo*2*7);
+		edCal.add(Calendar.DAY_OF_MONTH, weekNo*7);
 		
 		List<Lesson> list = new ArrayList<Lesson>();
 		try {
 			list = agent.schLsonByStd(name, stCal.getTime(), edCal.getTime());
-			logger.info(list.toString());
+			logger.info("Result from Search Lesson By Student=" + list.toString());
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
+			logger.error(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
 		

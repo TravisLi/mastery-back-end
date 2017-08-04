@@ -18,7 +18,11 @@ public class SchoolTracsConst {
 	public static final String REST_URL = HOST_URL + "/masteryoim/app";
 	public static final String TASK_REQ_URL = REST_URL + "/?v=&c=2";
 	public static final String FAC_REQ_URL = REST_URL + "/facility/read";
-	public static final String CUST_REQ_URL = REST_URL + "/customer/read";
+	public static final String CUST_URL = REST_URL + "/customer";
+	public static final String CUST_REQ_URL = CUST_URL + "/read";
+	public static final String CUST_UPD_URL = CUST_URL + "/update";
+	
+	public static final String OIM_CENTRE_ID = "2";
 	
 	public static final SimpleDateFormat SDF_FULL = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	public static final SimpleDateFormat SDF_DATE = new SimpleDateFormat("yyyy-MM-dd");

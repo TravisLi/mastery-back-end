@@ -24,6 +24,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -34,6 +35,8 @@ import mastery.schooltracs.json.serializer.ExistMakeupRequestSerializer;
 import mastery.schooltracs.json.serializer.NewMakeupRequestSerializer;
 import mastery.schooltracs.json.serializer.SearchRequestSerializer;
 import mastery.schooltracs.json.serializer.StaffWorkHourRequestSerializer;
+import mastery.schooltracs.model.Customer;
+import mastery.schooltracs.model.CustomerUpdateRequest;
 import mastery.schooltracs.model.ExistMakeupRequest;
 import mastery.schooltracs.model.NewMakeupRequest;
 import mastery.schooltracs.model.SearchActivityRequest;
@@ -90,7 +93,7 @@ public class SchoolTracsConn {
 		//EntityUtils.consume(entity2);
 
 	}
-
+	
 	public String sendCustReq(List<NameValuePair> nvps) throws ClientProtocolException, UnsupportedEncodingException, IOException{
 		logger.info("Send Customer Request");
 
@@ -159,6 +162,15 @@ public class SchoolTracsConn {
 		return EntityUtils.toString(request.getEntity());
 
 	}
+	
+	public String sendCustUpdReq(Customer cust) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{
+		
+		CustomerUpdateRequest req = new CustomerUpdateRequest(cust);
+		
+		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.CUST_UPD_URL, buildReqJson(req)));
+		
+		return EntityUtils.toString(request.getEntity());
+	}
 
 	private HttpResponse excuteClient(HttpPost post) throws ClientProtocolException, IOException{
 		reqSeq++;
@@ -219,12 +231,10 @@ public class SchoolTracsConn {
 
 		return buildReqJson(module,req);
 	}
-
+	
 	private static String buildReqJson(SimpleModule module, Object req) throws JsonProcessingException{
 
-		ObjectMapper om = new ObjectMapper();
-		om.enable(SerializationFeature.INDENT_OUTPUT);
-
+		ObjectMapper om = getObjMapper();
 		om.registerModule(module);
 
 		String json = om.writeValueAsString(req);
@@ -232,6 +242,24 @@ public class SchoolTracsConn {
 		logger.debug(json);
 
 		return json;
+	}
+	
+	private static String buildReqJson(Object req) throws JsonProcessingException{
+
+		ObjectMapper om = getObjMapper();
+
+		String json = om.writeValueAsString(req);
+
+		logger.debug(json);
+
+		return json;
+	}
+	
+	private static ObjectMapper getObjMapper(){
+		ObjectMapper om = new ObjectMapper();
+		om.setSerializationInclusion(Include.NON_NULL);
+		om.enable(SerializationFeature.INDENT_OUTPUT);
+		return om;
 	}
 
 }

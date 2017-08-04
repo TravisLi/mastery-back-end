@@ -28,7 +28,6 @@ public class Lesson implements Comparable<Lesson>  {
 	private Teacher teacher;
 	private List<Student> students = new ArrayList<Student>();
 	
-	
 	public Lesson() {
 		super();
 	}

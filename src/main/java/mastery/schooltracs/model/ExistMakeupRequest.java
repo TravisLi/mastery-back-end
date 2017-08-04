@@ -1,6 +1,5 @@
 package mastery.schooltracs.model;
 
-import mastery.model.Lesson;
 import mastery.schooltracs.util.SchoolTracsConst.Task;
 
 public class ExistMakeupRequest {

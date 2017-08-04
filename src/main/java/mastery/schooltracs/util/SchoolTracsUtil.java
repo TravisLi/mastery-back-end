@@ -4,7 +4,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -197,11 +196,12 @@ public class SchoolTracsUtil {
 	}
 	
 	public static HashMap<Integer, WorkHour> stfWkHrToMap(List<StaffWorkHour> list){
+		
 		logger.info("Staff Working Hour to Map start");
+		
 		HashMap<Integer, WorkHour> map = new HashMap<Integer, WorkHour>();
 		for(StaffWorkHour s: list){
 			if(s.getOnDuty()){
-
 				WorkHour w = new WorkHour(s);
 				map.put(w.getWeekDay(), w);
 				logger.info("Work Hour=" + w.toString());
@@ -378,6 +378,7 @@ public class SchoolTracsUtil {
 			
 			logger.debug("Lesson l = " + l.toString());
 			
+			//only cares about lesson within working hour
 			if(l.getStartDateTime().after(wkhrStDate)||l.getStartDateTime().equals(wkhrStDate)){
 				isAllLsonBeforeWkhr = false;
 				FreeTimeslot t1 = new FreeTimeslot();
@@ -395,7 +396,9 @@ public class SchoolTracsUtil {
 					stComp = l.getEndDateTime();
 				}
 				
+				//if it is last lesson
 				if(i == lsons.size()-1){
+					//the lesson is before end working hour
 					if(l.getEndDateTime().before(wkhrEdDate)){
 						logger.debug("free timesolt add");
 						FreeTimeslot t2 = new FreeTimeslot();
@@ -408,6 +411,7 @@ public class SchoolTracsUtil {
 			}	
 		}
 		
+		//if all lessons are before working hour, the whole working hour will be free timeslot
 		if(isAllLsonBeforeWkhr){
 			list.add(new FreeTimeslot(wkhrStDate, wkhrEdDate));
 		}
@@ -415,21 +419,5 @@ public class SchoolTracsUtil {
 		return list;
 		
 	}
-	
-	public static void comp(FreeTimeslot t, Lesson l, WorkHour wkhr){
-		//no time slot is assign
-		if(t.getStartDateTime()==null){
-			t.setStartDateTime(wkhr.getStTime());
-		}else{
-			if(l.getStartDateTime().before(t.getStartDateTime()) || l.getStartDateTime().equals(t.getStartDateTime())){
-				t.setStartDateTime(l.getEndDateTime());
-			}else{
-				t.setEndDateTime(l.getStartDateTime());
-			}
-		}
 		
-		
-		
-	}
-	
 }

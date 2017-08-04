@@ -73,21 +73,53 @@ public class SchoolTracsAgent {
 			}
 		}
 	}
+	
+	public Boolean updateCustInfo(Customer cust){
+		logger.info("Update Customer Info");
+		try {
+			return this.processCustUpdRsp(conn.sendCustUpdReq(cust));
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	//customer
 	public List<Customer> schCustsByPhone(String phone){
-		logger.info("Search Customer by Name Start");
+		logger.info("Search Customer by Phone Start");
 
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("filter[0][field]", "phone"));
 		nvps.add(new BasicNameValuePair("filter[0][data][type]", "string"));
 		nvps.add(new BasicNameValuePair("filter[0][data][value]", phone));
-		nvps.add(new BasicNameValuePair("centerId", "2"));
+		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
 			return jsonToCusts(conn.sendCustReq(nvps));
 		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		return new ArrayList<Customer>();
+	}
+	
+	public List<Customer> schCustsById(String id){
+		logger.info("Search Customer by Name Start");
+
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("filter[0][field]", "id"));
+		nvps.add(new BasicNameValuePair("filter[0][data][type]", "numeric"));
+		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
+		nvps.add(new BasicNameValuePair("filter[0][data][value]", id));
+		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("start", "0"));
+
+		try {
+			return jsonToCusts(conn.sendCustReq(nvps));
+		} catch (IOException e) {
+			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
 		return new ArrayList<Customer>();
@@ -304,7 +336,7 @@ public class SchoolTracsAgent {
 
 		logger.info("Search Lesson by Room Start");
 
-		//without facility, product
+		//without product
 		SearchActivityRequest.ContentOpt opt =new SearchActivityRequest.ContentOpt(true,true,false,true);
 
 		return this.schLson(name, fromDate, toDate, SchoolTracsConst.DisplayMode.FACILITY.code(), opt);
@@ -315,7 +347,7 @@ public class SchoolTracsAgent {
 
 		logger.info("Search Lesson by Teacher Start");
 
-		//without product staff
+		//without product
 		SearchActivityRequest.ContentOpt opt =new SearchActivityRequest.ContentOpt(true,true,false,true);
 
 		return schLson(name, fromDate, toDate, SchoolTracsConst.DisplayMode.STAFF.code(), opt);
@@ -356,6 +388,7 @@ public class SchoolTracsAgent {
 					rstLsons.add(l);
 				}
 			} catch (Exception e) {
+				logger.error(e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -388,7 +421,6 @@ public class SchoolTracsAgent {
 			return SchoolTracsUtil.isRmFullInPrd(r, l.getStartDateTime(), l.getEndDateTime(), lsonsByRm);
 
 		}else{
-			logger.error("Cannot find room with ID="+l.getRoom().getId());
 			throw new Exception("Cannot find room with ID="+l.getRoom().getId());
 		}
 	}
@@ -466,7 +498,33 @@ public class SchoolTracsAgent {
 
 	}
 
+	private Boolean processCustUpdRsp(String json){
+		
+		Boolean result = false;
+		
+		try {
+			JsonFactory factory = new JsonFactory();
+			JsonParser parser  = factory.createParser(json);
 
+			while(!parser.isClosed()){
+				JsonToken t = parser.nextToken();
+				if(JsonToken.FIELD_NAME.equals(t)){
+					String f = parser.getCurrentName();
+					if(f.equals("success")){
+						t = parser.nextToken();
+						if(JsonToken.VALUE_TRUE.equals(t)||JsonToken.VALUE_FALSE.equals(t)){
+							result = parser.getBooleanValue();
+						}
+					}
+				}
+			}
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
 
 	/*{
 	 * "9 ":
