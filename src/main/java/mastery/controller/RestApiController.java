@@ -1,21 +1,5 @@
 package mastery.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import mastery.model.Auth;
-import mastery.model.Lesson;
-import mastery.model.User;
-import mastery.schooltracs.core.SchoolTracsAgent;
-import mastery.schooltracs.model.Customer;
-import mastery.util.MasteryUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.ClientProtocolException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -23,7 +7,32 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-@CrossOrigin(origins = {"http://localhost:4200"}, maxAge = 4800, allowCredentials = "false") 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.ClientProtocolException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import mastery.model.Auth;
+import mastery.model.Lesson;
+import mastery.model.User;
+import mastery.schooltracs.core.SchoolTracsAgent;
+import mastery.schooltracs.model.Activity;
+import mastery.schooltracs.model.Customer;
+import mastery.util.MasteryUtil;
+import mastery.whatsapp.WhatsappAgent;
+
+@CrossOrigin(maxAge = 4800, allowCredentials = "false") 
 @RestController
 @RequestMapping("/api")
 public class RestApiController {
@@ -31,7 +40,10 @@ public class RestApiController {
 	public static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
 	
 	@Autowired
-	SchoolTracsAgent agent;
+	SchoolTracsAgent sAgent;
+	
+	@Autowired
+	WhatsappAgent wAgent;
 		
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public ResponseEntity<User> login(@RequestBody Auth auth){
@@ -40,7 +52,7 @@ public class RestApiController {
 			return null;
 		}
 		
-		List<Customer> custs = agent.schCustsByPhone(auth.getUsername());
+		List<Customer> custs = sAgent.schCustsByPhone(auth.getUsername());
 		
 		if(custs.isEmpty()){
 			return null;
@@ -64,7 +76,7 @@ public class RestApiController {
 	public ResponseEntity<Boolean> updateUserPwd(@PathVariable("custId")String custId, @PathVariable("oldPwd")String oldPwd, @PathVariable("newPwd")String newPwd){
 		logger.info("Update User Password");
 		
-		List<Customer> custs = agent.schCustsById(custId);
+		List<Customer> custs = sAgent.schCustsById(custId);
 		
 		if(custs.isEmpty() || custs.size() > 1){
 			logger.info("More than one or no customer is found");
@@ -81,7 +93,7 @@ public class RestApiController {
 		cust.setId(c.getId());
 		cust.setBarCode(newPwd);
 		
-		return new ResponseEntity<Boolean>(agent.updateCustInfo(cust), HttpStatus.OK);
+		return new ResponseEntity<Boolean>(sAgent.updateCustInfo(cust), HttpStatus.OK);
 		
 	}
 	
@@ -101,7 +113,7 @@ public class RestApiController {
 		
 		List<Lesson> list = new ArrayList<Lesson>();
 		try {
-			list = agent.schLsonByStd(name, stCal.getTime(), edCal.getTime());
+			list = sAgent.schLsonByStd(name, stCal.getTime(), edCal.getTime());
 			logger.info("Result from Search Lesson By Student=" + list.toString());
 		} catch (ClientProtocolException e) {
 			logger.error(e.getMessage());
@@ -118,33 +130,46 @@ public class RestApiController {
 	public ResponseEntity<List<Lesson>> findMkupLsons(@RequestBody Lesson lson, @PathVariable("stdName")String stdName){		
 		List<Lesson> list = new ArrayList<Lesson>();
 		
-		list = agent.schMkup(lson,stdName);
+		list = sAgent.schMkup(lson,stdName);
 		
 		logger.info(list.toString());
 		
 		return new ResponseEntity<List<Lesson>>(list, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/mkup/apply/new/{stdId}", method = RequestMethod.POST)
-	public ResponseEntity<Boolean> applyMkupLsons(@RequestBody Lesson toLson, @PathVariable("stdId")String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
+	@RequestMapping(value = "/mkup/apply/new/{frLsonId}/{stdId}", method = RequestMethod.POST)
+	public ResponseEntity<Boolean> applyMkupLsons(@RequestBody Lesson toLson, @PathVariable("frLsonId")String frLsonId, @PathVariable("stdId")String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
 		
 		logger.info("Lesson=" + toLson);
+		logger.info("frLsonId=" + frLsonId);
 		logger.info("stdId=" + stdId);
 		
-		Boolean result = agent.aplyNewMkup(toLson,stdId);
+		Activity act = sAgent.schActById(frLsonId);
+		
+		if(act==null){
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		}
+		
+		Boolean result = sAgent.aplyNewMkup(toLson,stdId);
 		
 		logger.info(result.toString());
+		
+		if(result){
+			
+			
+			
+		}
 		
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/mkup/apply/exist/{frLsonId}", method = RequestMethod.POST)
-	public ResponseEntity<Boolean> applyExtMkupLsons(@RequestBody Lesson toLson, @PathVariable("frLsonId")String frLsonId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
+	@RequestMapping(value = "/mkup/apply/exist/{frLsonId}/{stdId}", method = RequestMethod.POST)
+	public ResponseEntity<Boolean> applyExtMkupLsons(@RequestBody Lesson toLson, @PathVariable("frLsonId")String frLsonId, @PathVariable("stdId")String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
 		
 		logger.info("Lesson=" + toLson);
 		logger.info("frLsonId=" + frLsonId);
 		
-		Boolean result = agent.aplyExtMkup(toLson,frLsonId);
+		Boolean result = sAgent.aplyExtMkup(toLson,frLsonId);
 		
 		logger.info(result.toString());
 		
