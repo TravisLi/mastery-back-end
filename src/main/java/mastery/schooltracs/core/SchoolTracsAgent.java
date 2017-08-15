@@ -31,16 +31,23 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import mastery.model.FreeTimeslot;
 import mastery.model.Lesson;
 import mastery.model.Room;
+import mastery.model.Staff;
 import mastery.model.Teacher;
 import mastery.model.WorkHour;
 import mastery.schooltracs.json.deserializer.CustomersDeserializer;
 import mastery.schooltracs.json.deserializer.FacilitiesDeserializer;
 import mastery.schooltracs.json.deserializer.SearchResponseDeserializer;
 import mastery.schooltracs.json.deserializer.StaffWorkHoursDeserializer;
+import mastery.schooltracs.model.Activity;
+import mastery.schooltracs.model.ActivityResponse;
+import mastery.schooltracs.model.ActivityStaffResponse;
 import mastery.schooltracs.model.Customer;
 import mastery.schooltracs.model.Facility;
 import mastery.schooltracs.model.SearchActivityRequest;
 import mastery.schooltracs.model.SearchActivityResponse;
+import mastery.schooltracs.model.StStaff;
+import mastery.schooltracs.model.StaffMap;
+import mastery.schooltracs.model.StaffResponse;
 import mastery.schooltracs.model.StaffWorkHour;
 import mastery.schooltracs.util.SchoolTracsConst;
 import mastery.schooltracs.util.SchoolTracsUtil;
@@ -54,12 +61,24 @@ public class SchoolTracsAgent {
 	private SchoolTracsConn conn = new SchoolTracsConn();
 
 	private HashMap<String, Room> rmHash = new HashMap<String, Room>();
+	
+	private HashMap<String, Staff> stfHash = new HashMap<String, Staff>();
 
+	private List<Staff> adminList = new ArrayList<Staff>();
+	
+	private HashMap<String, Staff> skipHash = new HashMap<String, Staff>();
+	
 	@Value("${schooltracs.uname}")
 	private String uname;
 
 	@Value("${schooltracs.pwd}")
 	private String pwd;
+	
+	@Value("${schooltracs.admin}")
+	private List<String> admins;
+	
+	@Value("${schooltracs.skip}")
+	private List<String> skips;
 
 	@PostConstruct
 	public void init() throws IOException{
@@ -72,6 +91,8 @@ public class SchoolTracsAgent {
 				rmHash.put(r.getId(), r);
 			}
 		}
+		
+		stfHash = this.getStaffs();
 	}
 	
 	public Boolean updateCustInfo(Customer cust){
@@ -83,6 +104,93 @@ public class SchoolTracsAgent {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	
+	public HashMap<String, Staff> getStaffs(){
+		logger.info("Get All SchoolTracs Staffs");
+		
+		HashMap<String, Staff> hash = new HashMap<String, Staff>();
+		
+		try {
+			String json = conn.sendStfReq();
+			logger.debug(json);
+			if(json!=null){
+				ObjectMapper mapper = new ObjectMapper();
+				StaffResponse sr = mapper.readValue(json, StaffResponse.class);
+				if(sr.getSuccess()){
+					for(StStaff s: sr.getData()){
+						if(!s.getDeleted()){
+							Staff stf = new Staff(s);
+							
+							if(admins.contains(stf.getUid())){
+								this.adminList.add(stf);
+							}
+							
+							if(skips.contains(stf.getUid())){
+								this.skipHash.put(stf.getId(), stf);
+							}
+							
+							logger.debug(stf.toString());
+							if(hash.containsKey(s.getId())){
+								hash.replace(s.getId(), stf);
+							}else{
+								hash.put(s.getId(), stf);
+							}
+						}	
+					}		
+				}
+			}
+			
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return stfHash;
+		
+	}
+	
+	public List<StaffMap> schActStfById(String actId){
+		logger.info("Search Activities Staff by Id");
+	
+		try {
+			String json = conn.sendActReq(actId);
+			if(json!=null){
+				ObjectMapper mapper = new ObjectMapper();
+				ActivityStaffResponse asr = mapper.readValue(json, ActivityStaffResponse.class);
+				if(asr.getSuccess()){
+					return asr.getData();
+				}
+			}
+			
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return null;
+		
+	}
+	
+	public Activity schActById(String actId){
+		logger.info("Search Activities by Id");
+		
+		try {
+			String json = conn.sendActReq(actId);
+			if(json!=null){
+				ObjectMapper mapper = new ObjectMapper();
+				ActivityResponse ar = mapper.readValue(json, ActivityResponse.class);
+				if(ar.getSuccess()){
+					return ar.getData();
+				}
+			}
+			
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 
 	//customer
@@ -581,11 +689,11 @@ public class SchoolTracsAgent {
 
 		logger.info(list.toString());*/
 
-		HashMap<Integer, WorkHour> map = agent.getTchWkhr("10");
+		/*HashMap<Integer, WorkHour> map = agent.getTchWkhr("10");
 
 		for(WorkHour w: map.values()){
 			logger.info(w.toString());
-		}
+		}*/
 
 		/*if(list.size()>0){
 			Lesson l = list.get(0);

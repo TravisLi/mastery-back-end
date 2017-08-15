@@ -21,6 +21,12 @@ public class SchoolTracsConst {
 	public static final String CUST_URL = REST_URL + "/customer";
 	public static final String CUST_REQ_URL = CUST_URL + "/read";
 	public static final String CUST_UPD_URL = CUST_URL + "/update";
+	public static final String ACT_URL = REST_URL + "/activity";
+	public static final String ACT_REQ_URL = ACT_URL + "/read";
+	public static final String ACT_STAFF_URL = REST_URL + "/activityStaff";
+	public static final String ACT_STAFF_REQ_URL = ACT_STAFF_URL + "/read";
+	public static final String STAFF_URL = REST_URL + "/staff";
+	public static final String STAFF_REQ_URL = STAFF_URL + "/read";
 	
 	public static final String OIM_CENTRE_ID = "2";
 	

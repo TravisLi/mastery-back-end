@@ -23,7 +23,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-@CrossOrigin(maxAge = 4800, allowCredentials = "false")
+@CrossOrigin(origins = {"http://localhost:4200"}, maxAge = 4800, allowCredentials = "false") 
 @RestController
 @RequestMapping("/api")
 public class RestApiController {
