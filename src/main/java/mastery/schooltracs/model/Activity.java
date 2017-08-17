@@ -28,6 +28,9 @@ public class Activity {
 	private String staffId;
 	private String facilityId;
 	private String customerId;
+	private String oid;
+	private String weekDay;
+	
 	public String getId() {
 		return id;
 	}
@@ -183,6 +186,18 @@ public class Activity {
 	}
 	public void setCustomerId(String customerId) {
 		this.customerId = customerId;
+	}
+	public String getOid() {
+		return oid;
+	}
+	public void setOid(String oid) {
+		this.oid = oid;
+	}
+	public String getWeekDay() {
+		return weekDay;
+	}
+	public void setWeekDay(String weekDay) {
+		this.weekDay = weekDay;
 	}
 	
 }

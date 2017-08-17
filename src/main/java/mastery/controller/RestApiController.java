@@ -27,10 +27,8 @@ import mastery.model.Auth;
 import mastery.model.Lesson;
 import mastery.model.User;
 import mastery.schooltracs.core.SchoolTracsAgent;
-import mastery.schooltracs.model.Activity;
 import mastery.schooltracs.model.Customer;
 import mastery.util.MasteryUtil;
-import mastery.whatsapp.WhatsappAgent;
 
 @CrossOrigin(maxAge = 4800, allowCredentials = "false") 
 @RestController
@@ -40,10 +38,7 @@ public class RestApiController {
 	public static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
 	
 	@Autowired
-	SchoolTracsAgent sAgent;
-	
-	@Autowired
-	WhatsappAgent wAgent;
+	private SchoolTracsAgent sAgent;
 		
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public ResponseEntity<User> login(@RequestBody Auth auth){
@@ -137,39 +132,29 @@ public class RestApiController {
 		return new ResponseEntity<List<Lesson>>(list, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/mkup/apply/new/{frLsonId}/{stdId}", method = RequestMethod.POST)
-	public ResponseEntity<Boolean> applyMkupLsons(@RequestBody Lesson toLson, @PathVariable("frLsonId")String frLsonId, @PathVariable("stdId")String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
+	@RequestMapping(value = "/mkup/apply/new/{stdId}/{frLsonId}", method = RequestMethod.POST)
+	public ResponseEntity<Boolean> applyMkupLsons(@PathVariable("stdId")String stdId, @PathVariable("frLsonId")String frLsonId, @RequestBody Lesson toLson) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
 		
-		logger.info("Lesson=" + toLson);
-		logger.info("frLsonId=" + frLsonId);
 		logger.info("stdId=" + stdId);
+		logger.info("frLsonId=" + frLsonId);
+		logger.info("Lesson=" + toLson);
 		
-		Activity act = sAgent.schActById(frLsonId);
-		
-		if(act==null){
-			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
-		}
-		
-		Boolean result = sAgent.aplyNewMkup(toLson,stdId);
+		Boolean result = sAgent.aplyNewMkup(stdId, frLsonId, toLson);
 		
 		logger.info(result.toString());
-		
-		if(result){
-			
-			
-			
-		}
 		
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/mkup/apply/exist/{frLsonId}/{stdId}", method = RequestMethod.POST)
-	public ResponseEntity<Boolean> applyExtMkupLsons(@RequestBody Lesson toLson, @PathVariable("frLsonId")String frLsonId, @PathVariable("stdId")String stdId) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
+	@RequestMapping(value = "/mkup/apply/exist/{stdId}/{stdLsonId}/{frLsonId}", method = RequestMethod.POST)
+	public ResponseEntity<Boolean> applyExtMkupLsons(@PathVariable("stdId")String stdId, @PathVariable("stdLsonId")String stdLsonId, @PathVariable("frLsonId")String frLsonId, @RequestBody Lesson toLson) throws ClientProtocolException, UnsupportedEncodingException, JsonProcessingException, IOException{		
 		
-		logger.info("Lesson=" + toLson);
+		logger.info("stdId=" + stdId);
 		logger.info("frLsonId=" + frLsonId);
+		logger.info("Lesson=" + toLson);
 		
-		Boolean result = sAgent.aplyExtMkup(toLson,frLsonId);
+		
+		Boolean result = sAgent.aplyExtMkup(stdId, stdLsonId, frLsonId, toLson);
 		
 		logger.info(result.toString());
 		

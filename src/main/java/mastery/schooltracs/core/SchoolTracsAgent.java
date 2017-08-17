@@ -1,6 +1,7 @@
 package mastery.schooltracs.core;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -39,10 +41,12 @@ import mastery.schooltracs.json.deserializer.FacilitiesDeserializer;
 import mastery.schooltracs.json.deserializer.SearchResponseDeserializer;
 import mastery.schooltracs.json.deserializer.StaffWorkHoursDeserializer;
 import mastery.schooltracs.model.Activity;
+import mastery.schooltracs.model.ActivityFacilityResponse;
 import mastery.schooltracs.model.ActivityResponse;
 import mastery.schooltracs.model.ActivityStaffResponse;
 import mastery.schooltracs.model.Customer;
 import mastery.schooltracs.model.Facility;
+import mastery.schooltracs.model.FacilityMap;
 import mastery.schooltracs.model.SearchActivityRequest;
 import mastery.schooltracs.model.SearchActivityResponse;
 import mastery.schooltracs.model.StStaff;
@@ -52,6 +56,7 @@ import mastery.schooltracs.model.StaffWorkHour;
 import mastery.schooltracs.util.SchoolTracsConst;
 import mastery.schooltracs.util.SchoolTracsUtil;
 import mastery.util.MasteryUtil;
+import mastery.whatsapp.WhatsappAgent;
 
 @Service
 public class SchoolTracsAgent {
@@ -68,18 +73,18 @@ public class SchoolTracsAgent {
 	
 	private HashMap<String, Staff> skipHash = new HashMap<String, Staff>();
 	
-	@Value("${schooltracs.uname}")
+	@Autowired
+	private WhatsappAgent wAgent;
+	
+	@Value("${schooltracs.sys.uname}")
 	private String uname;
 
-	@Value("${schooltracs.pwd}")
+	@Value("${schooltracs.sys.pwd}")
 	private String pwd;
 	
-	@Value("${schooltracs.admin}")
-	private List<String> admins;
+	@Value("${schooltracs.mkup.sch.limit}")
+	private Integer mkupSchLimit;
 	
-	@Value("${schooltracs.skip}")
-	private List<String> skips;
-
 	@PostConstruct
 	public void init() throws IOException{
 		conn.login(uname, pwd);
@@ -122,14 +127,16 @@ public class SchoolTracsAgent {
 						if(!s.getDeleted()){
 							Staff stf = new Staff(s);
 							
-							if(admins.contains(stf.getUid())){
+							if(stf.getConfig().getAdminWapp()){
+								logger.info(stf.getName()+" is added to admin list");
 								this.adminList.add(stf);
 							}
 							
-							if(skips.contains(stf.getUid())){
+							if(stf.getConfig().getMkupSchSkip()){
+								logger.info(stf.getName()+" is added to skip list");
 								this.skipHash.put(stf.getId(), stf);
 							}
-							
+																					
 							logger.debug(stf.toString());
 							if(hash.containsKey(s.getId())){
 								hash.replace(s.getId(), stf);
@@ -150,11 +157,52 @@ public class SchoolTracsAgent {
 		
 	}
 	
+	private Staff getStfFromHash(String stfId){
+		if(stfHash.containsKey(stfId)){
+			return stfHash.get(stfId);
+		}else{
+			try {
+				StStaff st = this.schStfsById(stfId);
+				if(st!=null){
+					Staff s = new Staff(st);
+					stfHash.put(s.getId(), s);
+					return s;
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	public List<FacilityMap> schActFacById(String actId){
+		logger.info("Search Activities Facility by Id");
+	
+		try {
+			String json = conn.sendActFacReq(actId);
+			if(json!=null){
+				ObjectMapper mapper = new ObjectMapper();
+				ActivityFacilityResponse afr = mapper.readValue(json, ActivityFacilityResponse.class);
+				if(afr.getSuccess()){
+					return afr.getData();
+				}
+			}
+			
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return null;
+		
+	}
+	
 	public List<StaffMap> schActStfById(String actId){
 		logger.info("Search Activities Staff by Id");
 	
 		try {
-			String json = conn.sendActReq(actId);
+			String json = conn.sendActStfReq(actId);
 			if(json!=null){
 				ObjectMapper mapper = new ObjectMapper();
 				ActivityStaffResponse asr = mapper.readValue(json, ActivityStaffResponse.class);
@@ -213,8 +261,39 @@ public class SchoolTracsAgent {
 		return new ArrayList<Customer>();
 	}
 	
+	public StStaff schStfsById(String id) throws Exception{
+		logger.info("Search Staff by Id Start");
+
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("filter[0][field]", "id"));
+		nvps.add(new BasicNameValuePair("filter[0][data][type]", "numeric"));
+		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
+		nvps.add(new BasicNameValuePair("filter[0][data][value]", id));
+		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("start", "0"));
+
+		try {
+			String json = conn.sendStfReq(nvps);
+			if(json!=null){
+				ObjectMapper mapper = new ObjectMapper();
+				StaffResponse sr = mapper.readValue(json,StaffResponse.class);
+				if(sr.getSuccess()){
+					if(sr.getData().size()==1){
+						return sr.getData().get(0);
+					}else if(sr.getData().size()>1){
+						throw new Exception("More than one staff share the same id");
+					}
+				}
+			}
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public List<Customer> schCustsById(String id){
-		logger.info("Search Customer by Name Start");
+		logger.info("Search Customer by Id Start");
 
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("filter[0][field]", "id"));
@@ -249,13 +328,56 @@ public class SchoolTracsAgent {
 
 		return map;
 	}
+	
+	private Lesson getLsonById(String id){
+		
+		Activity act = this.schActById(id);
+		
+		if(act==null){
+			logger.error("Cannot find from lesson with id=" +id);
+			return null;
+		}
+		
+		Lesson frLson;
+		
+		try {
+			frLson = new Lesson(act);
+		} catch (ParseException e) {
+			logger.error(e.getMessage());
+			return null;
+		}
+		
+		List<StaffMap> stfs = this.schActStfById(act.getId());
+		
+		if(stfs.isEmpty() || stfs.size() > 1){
+			logger.error("More than one or no staff is found");
+			return null;
+		}
+		
+		StaffMap sMap = stfs.get(0);
+		
+		List<FacilityMap> facs = this.schActFacById(act.getId());
+		
+		if(facs.isEmpty() || facs.size() > 1){
+			logger.error("More than one or no facilty is found");
+			return null;
+		}
+		
+		FacilityMap f = facs.get(0);
+		
+		frLson.setTeacher(new Teacher(sMap));
+		frLson.setRoom(new Room(f));
+		
+		return frLson;
+		
+	}
 
 	//make up
-	public Boolean aplyNewMkup(Lesson toLson, String stdId){
+	public Boolean aplyNewMkup(String stdId, String frLsonId, Lesson toLson){
 		logger.info("Apply New Makeup class start");
 
 		try {
-
+	
 			String result = conn.sendNewMkupReq(toLson, stdId, false);
 			logger.debug(result);
 			if(result.contains("Exception")){
@@ -269,7 +391,18 @@ public class SchoolTracsAgent {
 			if(result.contains("Exception")){
 				return false;
 			}
+			
+			Runnable msgTask = new Runnable(){
 
+				@Override
+				public void run() {
+					sendWhatsappMsg(stdId, frLsonId, toLson);
+				}
+			};
+			
+			Thread t = new Thread(msgTask);
+			t.start();
+			
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
@@ -278,8 +411,8 @@ public class SchoolTracsAgent {
 
 		return true;
 	}
-
-	public Boolean aplyExtMkup(Lesson toLson, String stdLsonId){
+	
+	public Boolean aplyExtMkup(String stdId, String stdLsonId, String frLsonId, Lesson toLson){
 		logger.info("Apply Existing Makeup class start");
 
 		try {
@@ -290,7 +423,18 @@ public class SchoolTracsAgent {
 			if(result.contains("Exception")){
 				return false;
 			}
+			
+			Runnable msgTask = new Runnable(){
 
+				@Override
+				public void run() {
+					sendWhatsappMsg(stdId, frLsonId, toLson);
+				}
+			};
+			
+			Thread t = new Thread(msgTask);
+			t.start();
+			
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
@@ -299,15 +443,19 @@ public class SchoolTracsAgent {
 
 		return true;
 	}
-
+	
 	public List<Lesson> schMkup(Lesson src, String stdName){
-
 		logger.info("Search For Makeup Class Start");
-		final Integer limit = 5;
+		
+		List<Lesson> rstLsons= new ArrayList<Lesson>();
+		
+		if(skipHash.containsKey(src.getTeacher().getId())){
+			return rstLsons;
+		}
 		
 		//room-date Hash
 		HashMap<String, List<Lesson>> rdLsonHash = new HashMap<String, List<Lesson>>();
-		List<Lesson> rstLsons= new ArrayList<Lesson>();
+		
 		Calendar todayCal = MasteryUtil.getPlainCal(new Date());
 
 		Calendar stCal = MasteryUtil.getPlainCal(src.getStartDateTime());
@@ -347,7 +495,7 @@ public class SchoolTracsAgent {
 
 			for(Lesson l: fltLsonByRmAva(g0Lsons, rdLsonHash)){
 				rstLsons.add(l);
-				if(rstLsons.size()==limit){
+				if(rstLsons.size()==this.mkupSchLimit){
 					return rstLsons;
 				}
 			}
@@ -359,7 +507,7 @@ public class SchoolTracsAgent {
 
 			for(Lesson l: fltLsonByRmAva(g1Lsons, rdLsonHash)){
 				rstLsons.add(l);
-				if(rstLsons.size()==limit){
+				if(rstLsons.size()==this.mkupSchLimit){
 					return rstLsons;
 				}
 			}
@@ -404,7 +552,7 @@ public class SchoolTracsAgent {
 								try {
 									if(!isRmFull(l, rdLsonHash)){
 										rstLsons.add(l);
-										if(rstLsons.size()==limit){
+										if(rstLsons.size()==this.mkupSchLimit){
 											return rstLsons;
 										}
 									}
@@ -543,6 +691,40 @@ public class SchoolTracsAgent {
 
 	public List<Room> getRms() throws JsonParseException, JsonMappingException, ClientProtocolException, IOException{
 		return jsonToRms(conn.sendFacReq());
+	}
+	
+	private void sendWhatsappMsg(String stdId, String frLsonId, Lesson toLson){
+		logger.info("Send Whatsapp message start");
+		
+		logger.debug("student id=" + stdId);
+		logger.debug("frLson id=" + frLsonId);
+		logger.debug(toLson.toString());
+		
+		Lesson frLson = this.getLsonById(frLsonId);
+		
+		if(frLson == null){
+			logger.error("From Lesson cannot be found");
+			return;
+		}
+		
+		List<Customer> custs = this.schCustsById(stdId);
+		
+		if(custs.isEmpty() || custs.size() > 1){
+			logger.error("More than one or no customer is found");
+			return;
+		}
+		
+		Customer c = custs.get(0);
+		
+		Staff s = this.getStfFromHash(frLson.getTeacher().getId());
+		
+		wAgent.sendMkupStdMsg(c, frLson, toLson);
+		
+		wAgent.sendMkupTchMsg(s, c.getName(), frLson, toLson);
+		
+		for(Staff a: this.adminList){
+			wAgent.sendMkupAdmMsg(a, c.getName(), frLson, toLson);
+		}
 	}
 
 	private static SearchActivityResponse jsonToSchRsp(String json) throws JsonParseException, JsonMappingException, IOException{

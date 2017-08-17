@@ -11,6 +11,11 @@ public class Teacher {
 		super();
 	}
 	
+	public Teacher(Staff s){
+		this.id = s.getId();
+		this.name = s.getName();
+	}
+	
 	public Teacher(StaffMap map){
 		this.id = map.getStaffId();
 		this.name = map.getName();

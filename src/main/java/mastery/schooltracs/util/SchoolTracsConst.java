@@ -25,6 +25,8 @@ public class SchoolTracsConst {
 	public static final String ACT_REQ_URL = ACT_URL + "/read";
 	public static final String ACT_STAFF_URL = REST_URL + "/activityStaff";
 	public static final String ACT_STAFF_REQ_URL = ACT_STAFF_URL + "/read";
+	public static final String ACT_FAC_URL = REST_URL + "/activityFacility";
+	public static final String ACT_FAC_REQ_URL = ACT_FAC_URL + "/read";
 	public static final String STAFF_URL = REST_URL + "/staff";
 	public static final String STAFF_REQ_URL = STAFF_URL + "/read";
 	

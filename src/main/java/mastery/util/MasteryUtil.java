@@ -3,6 +3,7 @@ package mastery.util;
 import java.util.Calendar;
 import java.util.Date;
 
+import mastery.model.Lesson;
 import mastery.schooltracs.util.SchoolTracsConst;
 
 public class MasteryUtil {
@@ -28,6 +29,13 @@ public class MasteryUtil {
 		cal.set(Calendar.DAY_OF_MONTH, srcCal.get(Calendar.DAY_OF_MONTH));
 		
 		return cal.getTime();
+	}
+	
+	public static String getFormattedLsonTime(Lesson l){
+		String s = SchoolTracsConst.SDF_DATE.format(l.getStartDateTime()) + "\n";
+		s+= SchoolTracsConst.SDF_TIME.format(l.getStartDateTime()) + "-";
+		s+= SchoolTracsConst.SDF_TIME.format(l.getEndDateTime());
+		return s;
 	}
 	
 	public static String nullGuard(String src){
