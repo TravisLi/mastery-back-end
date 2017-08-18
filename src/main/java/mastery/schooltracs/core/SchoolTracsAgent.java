@@ -25,10 +25,10 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.type.CollectionType;
 
 import mastery.model.FreeTimeslot;
 import mastery.model.Lesson;
@@ -36,22 +36,17 @@ import mastery.model.Room;
 import mastery.model.Staff;
 import mastery.model.Teacher;
 import mastery.model.WorkHour;
-import mastery.schooltracs.json.deserializer.CustomersDeserializer;
-import mastery.schooltracs.json.deserializer.FacilitiesDeserializer;
 import mastery.schooltracs.json.deserializer.SearchResponseDeserializer;
-import mastery.schooltracs.json.deserializer.StaffWorkHoursDeserializer;
 import mastery.schooltracs.model.Activity;
-import mastery.schooltracs.model.ActivityFacilityResponse;
-import mastery.schooltracs.model.ActivityResponse;
-import mastery.schooltracs.model.ActivityStaffResponse;
 import mastery.schooltracs.model.Customer;
 import mastery.schooltracs.model.Facility;
 import mastery.schooltracs.model.FacilityMap;
+import mastery.schooltracs.model.ListReadResponse;
+import mastery.schooltracs.model.ReadResponse;
 import mastery.schooltracs.model.SearchActivityRequest;
 import mastery.schooltracs.model.SearchActivityResponse;
 import mastery.schooltracs.model.StStaff;
 import mastery.schooltracs.model.StaffMap;
-import mastery.schooltracs.model.StaffResponse;
 import mastery.schooltracs.model.StaffWorkHour;
 import mastery.schooltracs.util.SchoolTracsConst;
 import mastery.schooltracs.util.SchoolTracsUtil;
@@ -117,37 +112,32 @@ public class SchoolTracsAgent {
 		HashMap<String, Staff> hash = new HashMap<String, Staff>();
 		
 		try {
-			String json = conn.sendStfReq();
-			logger.debug(json);
-			if(json!=null){
-				ObjectMapper mapper = new ObjectMapper();
-				StaffResponse sr = mapper.readValue(json, StaffResponse.class);
-				if(sr.getSuccess()){
-					for(StStaff s: sr.getData()){
-						if(!s.getDeleted()){
-							Staff stf = new Staff(s);
-							
-							if(stf.getConfig().getAdminWapp()){
-								logger.info(stf.getName()+" is added to admin list");
-								this.adminList.add(stf);
-							}
-							
-							if(stf.getConfig().getMkupSchSkip()){
-								logger.info(stf.getName()+" is added to skip list");
-								this.skipHash.put(stf.getId(), stf);
-							}
-																					
-							logger.debug(stf.toString());
-							if(hash.containsKey(s.getId())){
-								hash.replace(s.getId(), stf);
-							}else{
-								hash.put(s.getId(), stf);
-							}
-						}	
-					}		
-				}
-			}
 			
+			List<StStaff> list = digestListReadRspJson(conn.sendStfReq(), StStaff.class);
+			
+			for(StStaff s: list){
+				if(!s.getDeleted()){
+					Staff stf = new Staff(s);
+					
+					if(stf.getConfig().getAdminWapp()){
+						logger.info(stf.getName()+" is added to admin list");
+						this.adminList.add(stf);
+					}
+					
+					if(stf.getConfig().getMkupSchSkip()){
+						logger.info(stf.getName()+" is added to skip list");
+						this.skipHash.put(stf.getId(), stf);
+					}
+																			
+					logger.debug(stf.toString());
+					if(hash.containsKey(s.getId())){
+						hash.replace(s.getId(), stf);
+					}else{
+						hash.put(s.getId(), stf);
+					}
+				}	
+			}		
+						
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
@@ -180,14 +170,8 @@ public class SchoolTracsAgent {
 		logger.info("Search Activities Facility by Id");
 	
 		try {
-			String json = conn.sendActFacReq(actId);
-			if(json!=null){
-				ObjectMapper mapper = new ObjectMapper();
-				ActivityFacilityResponse afr = mapper.readValue(json, ActivityFacilityResponse.class);
-				if(afr.getSuccess()){
-					return afr.getData();
-				}
-			}
+
+			return digestListReadRspJson(conn.sendActFacReq(actId), FacilityMap.class);
 			
 		} catch (IOException e) {
 			logger.error(e.getMessage());
@@ -202,14 +186,8 @@ public class SchoolTracsAgent {
 		logger.info("Search Activities Staff by Id");
 	
 		try {
-			String json = conn.sendActStfReq(actId);
-			if(json!=null){
-				ObjectMapper mapper = new ObjectMapper();
-				ActivityStaffResponse asr = mapper.readValue(json, ActivityStaffResponse.class);
-				if(asr.getSuccess()){
-					return asr.getData();
-				}
-			}
+
+			return digestListReadRspJson(conn.sendActStfReq(actId), StaffMap.class);
 			
 		} catch (IOException e) {
 			logger.error(e.getMessage());
@@ -224,15 +202,7 @@ public class SchoolTracsAgent {
 		logger.info("Search Activities by Id");
 		
 		try {
-			String json = conn.sendActReq(actId);
-			if(json!=null){
-				ObjectMapper mapper = new ObjectMapper();
-				ActivityResponse ar = mapper.readValue(json, ActivityResponse.class);
-				if(ar.getSuccess()){
-					return ar.getData();
-				}
-			}
-			
+			return digestReadRspJson(conn.sendActReq(actId), Activity.class);			
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
@@ -253,12 +223,14 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
-			return jsonToCusts(conn.sendCustReq(nvps));
+			return digestListReadRspJson(conn.sendCustReq(nvps), Customer.class);
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
+		
 		return new ArrayList<Customer>();
+
 	}
 	
 	public StStaff schStfsById(String id) throws Exception{
@@ -273,18 +245,16 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
-			String json = conn.sendStfReq(nvps);
-			if(json!=null){
-				ObjectMapper mapper = new ObjectMapper();
-				StaffResponse sr = mapper.readValue(json,StaffResponse.class);
-				if(sr.getSuccess()){
-					if(sr.getData().size()==1){
-						return sr.getData().get(0);
-					}else if(sr.getData().size()>1){
-						throw new Exception("More than one staff share the same id");
-					}
-				}
+			//String json = conn.sendStfReq(nvps);
+			
+			List<StStaff> list = digestListReadRspJson(conn.sendStfReq(nvps), StStaff.class);
+			
+			if(list.size()==1){
+				return list.get(0);
+			}else if(list.size()>1){
+				throw new Exception("More than one staff share the same id");
 			}
+			
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
@@ -292,7 +262,7 @@ public class SchoolTracsAgent {
 		return null;
 	}
 	
-	public List<Customer> schCustsById(String id){
+	public Customer schCustsById(String id) throws Exception{
 		logger.info("Search Customer by Id Start");
 
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
@@ -304,12 +274,20 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
-			return jsonToCusts(conn.sendCustReq(nvps));
+			
+			List<Customer> list = digestListReadRspJson(conn.sendCustReq(nvps), Customer.class);
+			
+			if(list.size()==1){
+				return list.get(0);
+			}else if(list.size()>1){
+				throw new Exception("More than one staff share the same id");
+			}
+			
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
-		return new ArrayList<Customer>();
+		return null;
 	}
 
 	public HashMap<Integer, WorkHour> getTchWkhr(String tchId){
@@ -318,8 +296,7 @@ public class SchoolTracsAgent {
 
 		try{
 
-			String result = conn.sendStfWkhrReq(tchId);
-			map = SchoolTracsUtil.stfWkHrToMap(jsonToStfWkhr(result));
+			map = SchoolTracsUtil.stfWkHrToMap(digestListReadRspJson(conn.sendStfWkhrReq(tchId), StaffWorkHour.class));
 
 		}catch (IOException e) {
 			logger.error(e.getMessage());
@@ -347,6 +324,7 @@ public class SchoolTracsAgent {
 			return null;
 		}
 		
+		//assume only one staff will be found
 		List<StaffMap> stfs = this.schActStfById(act.getId());
 		
 		if(stfs.isEmpty() || stfs.size() > 1){
@@ -356,6 +334,7 @@ public class SchoolTracsAgent {
 		
 		StaffMap sMap = stfs.get(0);
 		
+		//assume only one facility will be found
 		List<FacilityMap> facs = this.schActFacById(act.getId());
 		
 		if(facs.isEmpty() || facs.size() > 1){
@@ -707,14 +686,14 @@ public class SchoolTracsAgent {
 			return;
 		}
 		
-		List<Customer> custs = this.schCustsById(stdId);
-		
-		if(custs.isEmpty() || custs.size() > 1){
-			logger.error("More than one or no customer is found");
+		Customer c;
+		try {
+			c = this.schCustsById(stdId);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
 			return;
 		}
-		
-		Customer c = custs.get(0);
 		
 		Staff s = this.getStfFromHash(frLson.getTeacher().getId());
 		
@@ -740,43 +719,9 @@ public class SchoolTracsAgent {
 
 	}
 
-	private static List<Customer> jsonToCusts(String json) throws JsonParseException, JsonMappingException, IOException{
-
-		logger.info("Json="+json);
-
-		ObjectMapper mapper = new ObjectMapper();
-		CollectionType type = mapper.getTypeFactory().constructCollectionType(List.class,Customer.class);
-		SimpleModule module = new SimpleModule();
-		module.addDeserializer(List.class, new CustomersDeserializer());
-		mapper.registerModule(module);
-
-		return mapper.readValue(json, type);
-
-	}
-
-	private static List<StaffWorkHour> jsonToStfWkhr(String json) throws JsonParseException, JsonMappingException, IOException{
-
-		logger.info("Json="+json);
-
-		ObjectMapper mapper = new ObjectMapper();
-		CollectionType type = mapper.getTypeFactory().constructCollectionType(List.class,StaffWorkHour.class);
-		SimpleModule module = new SimpleModule();
-		module.addDeserializer(List.class, new StaffWorkHoursDeserializer());
-		mapper.registerModule(module);
-
-		return mapper.readValue(json, type);
-
-	}
-
 	private static List<Room> jsonToRms(String json) throws JsonParseException, JsonMappingException, IOException{
 
-		ObjectMapper mapper = new ObjectMapper();
-		CollectionType type = mapper.getTypeFactory().constructCollectionType(List.class,Facility.class);
-		SimpleModule module = new SimpleModule();
-		module.addDeserializer(List.class, new FacilitiesDeserializer());
-		mapper.registerModule(module);
-
-		List<Facility> facList = mapper.readValue(json, type);
+		List<Facility> facList = digestListReadRspJson(json, Facility.class);
 
 		List<Room> roomList = new ArrayList<Room>();
 
@@ -786,6 +731,38 @@ public class SchoolTracsAgent {
 
 		return roomList;
 
+	}
+	
+	private static <T> T digestReadRspJson(String json, Class<T> c){
+		ObjectMapper mapper = new ObjectMapper();
+		JavaType type = mapper.getTypeFactory().constructParametricType(ReadResponse.class, c);
+		try {
+			logger.debug("json="+json);
+			ReadResponse<T> r = mapper.readValue(json, type);
+			if(r.getSuccess()){
+				return r.getData();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	private static <T> List<T> digestListReadRspJson(String json, Class<T> c){
+		ObjectMapper mapper = new ObjectMapper();
+		JavaType type = mapper.getTypeFactory().constructParametricType(ListReadResponse.class, c);
+		try {
+			logger.debug("json="+json);
+			ListReadResponse<T> r = mapper.readValue(json, type);
+			if(r.getSuccess()){
+				return r.getData();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return new ArrayList<T>();
 	}
 
 	private Boolean processCustUpdRsp(String json){

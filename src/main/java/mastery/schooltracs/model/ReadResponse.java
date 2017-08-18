@@ -1,14 +1,21 @@
 package mastery.schooltracs.model;
 
-public class ActivityResponse {
-	
-	private Activity data;
+public class ReadResponse<T> {
+
+	private Integer total;
+	private T data;
 	private Boolean success;
 	
-	public Activity getData() {
+	public Integer getTotal() {
+		return total;
+	}
+	public void setTotal(Integer total) {
+		this.total = total;
+	}
+	public T getData() {
 		return data;
 	}
-	public void setData(Activity data) {
+	public void setData(T data) {
 		this.data = data;
 	}
 	public Boolean getSuccess() {

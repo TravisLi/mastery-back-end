@@ -71,15 +71,15 @@ public class RestApiController {
 	public ResponseEntity<Boolean> updateUserPwd(@PathVariable("custId")String custId, @PathVariable("oldPwd")String oldPwd, @PathVariable("newPwd")String newPwd){
 		logger.info("Update User Password");
 		
-		List<Customer> custs = sAgent.schCustsById(custId);
-		
-		if(custs.isEmpty() || custs.size() > 1){
-			logger.info("More than one or no customer is found");
+		Customer c;
+		try {
+			c = sAgent.schCustsById(custId);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
 			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 		}
-		
-		Customer c = custs.get(0);
-		
+				
 		if(!c.getBarCode().equals(oldPwd)){
 			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 		}
