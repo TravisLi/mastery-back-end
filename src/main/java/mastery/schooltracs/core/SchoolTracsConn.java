@@ -94,16 +94,60 @@ public class SchoolTracsConn {
 
 	}
 	
+	public String sendStfReq() throws ClientProtocolException, UnsupportedEncodingException, IOException{
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("start", "0"));
+		//nvps.add(new BasicNameValuePair("limit", "50"));
+		nvps.add(new BasicNameValuePair("centerId", "2"));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
+		
+		return this.sendNvpReq(nvps, SchoolTracsConst.STAFF_REQ_URL);
+	}
+	
+	public String sendActFacReq(String actId) throws ClientProtocolException, UnsupportedEncodingException, IOException{
+		logger.info("Send Activities Facility Request");
+
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("activityId", actId));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
+		
+		return this.sendNvpReq(nvps, SchoolTracsConst.ACT_FAC_REQ_URL);
+	}
+	
+	public String sendActStfReq(String actId) throws ClientProtocolException, UnsupportedEncodingException, IOException{
+		logger.info("Send Activities Staff Request");
+
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("activityId", actId));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
+		
+		return this.sendNvpReq(nvps, SchoolTracsConst.ACT_STAFF_REQ_URL);
+	}
+	
+	public String sendActReq(String actId) throws ClientProtocolException, UnsupportedEncodingException, IOException{
+		logger.info("Send Activity Request");
+
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("id", actId));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
+		
+		return this.sendNvpReq(nvps, SchoolTracsConst.ACT_REQ_URL);
+	}
+	
+	public String sendStfReq(List<NameValuePair> nvps) throws ClientProtocolException, UnsupportedEncodingException, IOException{
+		logger.info("Send Staff Request");
+
+		return this.sendNvpReq(nvps, SchoolTracsConst.STAFF_REQ_URL);
+
+	}
+	
 	public String sendCustReq(List<NameValuePair> nvps) throws ClientProtocolException, UnsupportedEncodingException, IOException{
 		logger.info("Send Customer Request");
 
-		HttpResponse request = this.excuteClient(prepareHttpFormPost(SchoolTracsConst.CUST_REQ_URL, nvps));
-
-		return EntityUtils.toString(request.getEntity());
+		return this.sendNvpReq(nvps, SchoolTracsConst.CUST_REQ_URL);
 
 	}
-
-
+	
 	public String sendFacReq() throws ClientProtocolException, IOException{
 
 		logger.info("Send Facility Request");
@@ -170,6 +214,14 @@ public class SchoolTracsConn {
 		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.CUST_UPD_URL, buildReqJson(req)));
 		
 		return EntityUtils.toString(request.getEntity());
+	}
+	
+	private String sendNvpReq(List<NameValuePair> nvps, String url) throws ClientProtocolException, UnsupportedEncodingException, IOException{
+		
+		HttpResponse request = this.excuteClient(prepareHttpFormPost(url, nvps));
+
+		return EntityUtils.toString(request.getEntity());
+		
 	}
 
 	private HttpResponse excuteClient(HttpPost post) throws ClientProtocolException, IOException{

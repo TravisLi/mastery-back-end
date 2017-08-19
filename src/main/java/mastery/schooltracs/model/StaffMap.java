@@ -2,12 +2,20 @@ package mastery.schooltracs.model;
 
 public class StaffMap {
 
+	private String id;
 	private String activityId;
 	private String staffId;
 	private String name;
 	private String status;
 	private String remark;
 	
+	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
 	public String getActivityId() {
 		return activityId;
 	}
