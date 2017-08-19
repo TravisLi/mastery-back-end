@@ -7,4 +7,4 @@ RUN apk --update add tzdata && \
 
 ADD target/app.jar /app.jar
 RUN sh -c 'touch /app.jar'
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom -Xmx2048m -XX:+UseConcMarkSweepGC","-jar","/app.jar"]
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom -Xmx1024m -XX:+UseConcMarkSweepGC","-jar","/app.jar"]
