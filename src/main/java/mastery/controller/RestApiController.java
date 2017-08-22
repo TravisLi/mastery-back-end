@@ -67,6 +67,7 @@ public class RestApiController {
 		return null;
 		
 	}
+	
 	@RequestMapping(value = "/user/updatepwd/{custId}/{oldPwd}/{newPwd}", method = RequestMethod.GET)
 	public ResponseEntity<Boolean> updateUserPwd(@PathVariable("custId")String custId, @PathVariable("oldPwd")String oldPwd, @PathVariable("newPwd")String newPwd){
 		logger.info("Update User Password");
@@ -91,7 +92,6 @@ public class RestApiController {
 		return new ResponseEntity<Boolean>(sAgent.updateCustInfo(cust), HttpStatus.OK);
 		
 	}
-	
 	
 	@RequestMapping(value = "/lesson/student/{name}/{weekNo}", method = RequestMethod.GET)
 	public ResponseEntity<List<Lesson>> getStdLsons(@PathVariable("name")String name, @PathVariable("weekNo")Integer weekNo){
@@ -152,7 +152,6 @@ public class RestApiController {
 		logger.info("stdId=" + stdId);
 		logger.info("frLsonId=" + frLsonId);
 		logger.info("Lesson=" + toLson);
-		
 		
 		Boolean result = sAgent.aplyExtMkup(stdId, stdLsonId, frLsonId, toLson);
 		

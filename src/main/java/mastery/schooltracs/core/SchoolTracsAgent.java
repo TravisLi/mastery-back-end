@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.type.CollectionType;
 
 import mastery.model.FreeTimeslot;
 import mastery.model.Lesson;
@@ -37,6 +38,7 @@ import mastery.model.Staff;
 import mastery.model.Teacher;
 import mastery.model.WorkHour;
 import mastery.schooltracs.json.deserializer.SearchResponseDeserializer;
+import mastery.schooltracs.json.deserializer.StaffWorkHoursDeserializer;
 import mastery.schooltracs.model.Activity;
 import mastery.schooltracs.model.Customer;
 import mastery.schooltracs.model.Facility;
@@ -58,8 +60,6 @@ public class SchoolTracsAgent {
 
 	private static final Logger logger = LoggerFactory.getLogger(SchoolTracsAgent.class);
 
-	private SchoolTracsConn conn = new SchoolTracsConn();
-
 	private HashMap<String, Room> rmHash = new HashMap<String, Room>();
 	
 	private HashMap<String, Staff> stfHash = new HashMap<String, Staff>();
@@ -67,6 +67,9 @@ public class SchoolTracsAgent {
 	private List<Staff> adminList = new ArrayList<Staff>();
 	
 	private HashMap<String, Staff> skipHash = new HashMap<String, Staff>();
+	
+	@Autowired
+	private SchoolTracsConn conn;
 	
 	@Autowired
 	private WhatsappAgent wAgent;
@@ -82,7 +85,7 @@ public class SchoolTracsAgent {
 	
 	@PostConstruct
 	public void init() throws IOException{
-		conn.login(uname, pwd);
+		
 		List<Room> rms = this.getRms();
 		for(Room r:rms){
 			if(rmHash.containsKey(r.getId())){
@@ -94,18 +97,8 @@ public class SchoolTracsAgent {
 		
 		stfHash = this.getStaffs();
 	}
-	
-	public Boolean updateCustInfo(Customer cust){
-		logger.info("Update Customer Info");
-		try {
-			return this.processCustUpdRsp(conn.sendCustUpdReq(cust));
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-			e.printStackTrace();
-		}
-		return false;
-	}
-	
+		
+	//staff
 	public HashMap<String, Staff> getStaffs(){
 		logger.info("Get All SchoolTracs Staffs");
 		
@@ -166,7 +159,36 @@ public class SchoolTracsAgent {
 		return null;
 	}
 	
-	public List<FacilityMap> schActFacById(String actId){
+	private StStaff schStfsById(String id) throws Exception{
+		logger.info("Search Staff by Id Start");
+
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("filter[0][field]", "id"));
+		nvps.add(new BasicNameValuePair("filter[0][data][type]", "numeric"));
+		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
+		nvps.add(new BasicNameValuePair("filter[0][data][value]", id));
+		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("start", "0"));
+
+		try {
+			
+			List<StStaff> list = digestListReadRspJson(conn.sendStfReq(nvps), StStaff.class);
+			
+			if(list.size()==1){
+				return list.get(0);
+			}else if(list.size()>1){
+				throw new Exception("More than one staff share the same id");
+			}
+			
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	//Activity
+	private List<FacilityMap> schActFacById(String actId){
 		logger.info("Search Activities Facility by Id");
 	
 		try {
@@ -182,7 +204,7 @@ public class SchoolTracsAgent {
 		
 	}
 	
-	public List<StaffMap> schActStfById(String actId){
+	private List<StaffMap> schActStfById(String actId){
 		logger.info("Search Activities Staff by Id");
 	
 		try {
@@ -198,7 +220,7 @@ public class SchoolTracsAgent {
 		
 	}
 	
-	public Activity schActById(String actId){
+	private Activity schActById(String actId){
 		logger.info("Search Activities by Id");
 		
 		try {
@@ -233,35 +255,6 @@ public class SchoolTracsAgent {
 
 	}
 	
-	public StStaff schStfsById(String id) throws Exception{
-		logger.info("Search Staff by Id Start");
-
-		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-		nvps.add(new BasicNameValuePair("filter[0][field]", "id"));
-		nvps.add(new BasicNameValuePair("filter[0][data][type]", "numeric"));
-		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
-		nvps.add(new BasicNameValuePair("filter[0][data][value]", id));
-		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
-		nvps.add(new BasicNameValuePair("start", "0"));
-
-		try {
-			//String json = conn.sendStfReq(nvps);
-			
-			List<StStaff> list = digestListReadRspJson(conn.sendStfReq(nvps), StStaff.class);
-			
-			if(list.size()==1){
-				return list.get(0);
-			}else if(list.size()>1){
-				throw new Exception("More than one staff share the same id");
-			}
-			
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
 	public Customer schCustsById(String id) throws Exception{
 		logger.info("Search Customer by Id Start");
 
@@ -290,13 +283,25 @@ public class SchoolTracsAgent {
 		return null;
 	}
 
-	public HashMap<Integer, WorkHour> getTchWkhr(String tchId){
+	public Boolean updateCustInfo(Customer cust){
+		logger.info("Update Customer Info");
+		try {
+			return this.processCustUpdRsp(conn.sendCustUpdReq(cust));
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	//teacher
+	private HashMap<Integer, WorkHour> getTchWkhr(String tchId){
 		logger.info("Get Teacher Working Hour");
 		HashMap<Integer, WorkHour> map = new HashMap<Integer, WorkHour>();
 
 		try{
 
-			map = SchoolTracsUtil.stfWkHrToMap(digestListReadRspJson(conn.sendStfWkhrReq(tchId), StaffWorkHour.class));
+			map = SchoolTracsUtil.stfWkHrToMap(jsonToStfWkHrs(conn.sendStfWkhrReq(tchId)));
 
 		}catch (IOException e) {
 			logger.error(e.getMessage());
@@ -306,51 +311,6 @@ public class SchoolTracsAgent {
 		return map;
 	}
 	
-	private Lesson getLsonById(String id){
-		
-		Activity act = this.schActById(id);
-		
-		if(act==null){
-			logger.error("Cannot find from lesson with id=" +id);
-			return null;
-		}
-		
-		Lesson frLson;
-		
-		try {
-			frLson = new Lesson(act);
-		} catch (ParseException e) {
-			logger.error(e.getMessage());
-			return null;
-		}
-		
-		//assume only one staff will be found
-		List<StaffMap> stfs = this.schActStfById(act.getId());
-		
-		if(stfs.isEmpty() || stfs.size() > 1){
-			logger.error("More than one or no staff is found");
-			return null;
-		}
-		
-		StaffMap sMap = stfs.get(0);
-		
-		//assume only one facility will be found
-		List<FacilityMap> facs = this.schActFacById(act.getId());
-		
-		if(facs.isEmpty() || facs.size() > 1){
-			logger.error("More than one or no facilty is found");
-			return null;
-		}
-		
-		FacilityMap f = facs.get(0);
-		
-		frLson.setTeacher(new Teacher(sMap));
-		frLson.setRoom(new Room(f));
-		
-		return frLson;
-		
-	}
-
 	//make up
 	public Boolean aplyNewMkup(String stdId, String frLsonId, Lesson toLson){
 		logger.info("Apply New Makeup class start");
@@ -555,18 +515,6 @@ public class SchoolTracsAgent {
 	}
 
 	//lesson
-	public List<Lesson> schLsonByName(String name, Date fromDate, Date toDate) throws ClientProtocolException, IOException{
-
-		logger.info("Search Lesson by Name Start");
-
-		//without product
-		SearchActivityRequest.ContentOpt opt =new SearchActivityRequest.ContentOpt(true,true,false,true);
-
-		return schLson(name, fromDate, toDate, SchoolTracsConst.DisplayMode.COURSE.code(), opt);
-
-	}
-
-	//search lesson by facility
 	public List<Lesson> schLsonByRm(String name, Date fromDate, Date toDate) throws ClientProtocolException, IOException{
 
 		logger.info("Search Lesson by Room Start");
@@ -600,6 +548,51 @@ public class SchoolTracsAgent {
 
 	}
 
+	private Lesson getLsonById(String id){
+		
+		Activity act = this.schActById(id);
+		
+		if(act==null){
+			logger.error("Cannot find from lesson with id=" +id);
+			return null;
+		}
+		
+		Lesson frLson;
+		
+		try {
+			frLson = new Lesson(act);
+		} catch (ParseException e) {
+			logger.error(e.getMessage());
+			return null;
+		}
+		
+		//assume only one staff will be found
+		List<StaffMap> stfs = this.schActStfById(act.getId());
+		
+		if(stfs.isEmpty() || stfs.size() > 1){
+			logger.error("More than one or no staff is found");
+			return null;
+		}
+		
+		StaffMap sMap = stfs.get(0);
+		
+		//assume only one facility will be found
+		List<FacilityMap> facs = this.schActFacById(act.getId());
+		
+		if(facs.isEmpty() || facs.size() > 1){
+			logger.error("More than one or no facilty is found");
+			return null;
+		}
+		
+		FacilityMap f = facs.get(0);
+		
+		frLson.setTeacher(new Teacher(sMap));
+		frLson.setRoom(new Room(f));
+		
+		return frLson;
+		
+	}
+	
 	private List<Lesson> schLson(String schStr, Date fromDate, Date toDate, String displayMode, SearchActivityRequest.ContentOpt opt) throws JsonParseException, JsonMappingException, ClientProtocolException, IOException{
 
 		SearchActivityResponse schRsp = jsonToSchRsp(conn.sendSchReq(schStr, fromDate, toDate, displayMode, opt)); 
@@ -631,8 +624,13 @@ public class SchoolTracsAgent {
 
 		return rstLsons;
 	}
-
-	public Boolean isRmFull(Lesson l, HashMap<String, List<Lesson>> rdLsonHash) throws Exception{
+	
+	//room
+	private List<Room> getRms() throws JsonParseException, JsonMappingException, ClientProtocolException, IOException{
+		return jsonToRms(conn.sendFacReq());
+	}
+	
+	private Boolean isRmFull(Lesson l, HashMap<String, List<Lesson>> rdLsonHash) throws Exception{
 		if(rmHash.containsKey(l.getRoom().getId())){
 			Room r = rmHash.get(l.getRoom().getId());
 			Calendar cal = MasteryUtil.getPlainCal(l.getStartDateTime());
@@ -660,18 +658,7 @@ public class SchoolTracsAgent {
 		}
 	}
 
-	//room
-	public Room getRmByName(String name){
-		if(rmHash.containsKey(name)){
-			return rmHash.get(name);
-		}
-		return null;
-	}
-
-	public List<Room> getRms() throws JsonParseException, JsonMappingException, ClientProtocolException, IOException{
-		return jsonToRms(conn.sendFacReq());
-	}
-	
+	//Whatsapp
 	private void sendWhatsappMsg(String stdId, String frLsonId, Lesson toLson){
 		logger.info("Send Whatsapp message start");
 		
@@ -706,6 +693,7 @@ public class SchoolTracsAgent {
 		}
 	}
 
+	//aux
 	private static SearchActivityResponse jsonToSchRsp(String json) throws JsonParseException, JsonMappingException, IOException{
 
 		logger.info("Json="+json);
@@ -763,6 +751,20 @@ public class SchoolTracsAgent {
 		}
 		
 		return new ArrayList<T>();
+	}
+	
+	private static List<StaffWorkHour> jsonToStfWkHrs(String json) throws JsonParseException, JsonMappingException, IOException{
+
+		logger.info("Json="+json);
+	
+		ObjectMapper mapper = new ObjectMapper();
+		CollectionType type = mapper.getTypeFactory().constructCollectionType(List.class, StaffWorkHour.class);
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(List.class, new StaffWorkHoursDeserializer());
+		mapper.registerModule(module);
+
+		return mapper.readValue(json, type);
+
 	}
 
 	private Boolean processCustUpdRsp(String json){
@@ -832,7 +834,7 @@ public class SchoolTracsAgent {
 
 		return "";
 	}
-
+	
 	public static void main(String[] args) throws IOException{
 		SchoolTracsAgent agent = new SchoolTracsAgent();
 		agent.uname = "travisli@masteryoim";

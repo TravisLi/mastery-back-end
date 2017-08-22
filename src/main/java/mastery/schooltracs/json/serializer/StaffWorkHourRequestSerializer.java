@@ -1,4 +1,4 @@
-package mastery.schooltracs.json.serializer;
+ package mastery.schooltracs.json.serializer;
 
 import java.io.IOException;
 
