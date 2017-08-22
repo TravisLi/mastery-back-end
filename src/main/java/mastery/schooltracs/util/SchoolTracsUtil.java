@@ -11,6 +11,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import mastery.model.FreeTimeslot;
 import mastery.model.Lesson;
 import mastery.model.Room;
@@ -332,6 +336,11 @@ public class SchoolTracsUtil {
 		return diff.intValue() ;
 	}
 	
+	public static Integer secDiffBtwDates(Date d1, Date d2){
+		Long diff = Math.abs(d1.getTime() - d2.getTime())/1000;
+		return diff.intValue() ;
+	}
+	
 	public static HashMap<Date, List<Lesson>> lsonsToDateMap(List<Lesson> list){
 		HashMap<Date, List<Lesson>> map = new HashMap<Date,List<Lesson>>();
 		
@@ -418,6 +427,13 @@ public class SchoolTracsUtil {
 		
 		return list;
 		
+	}
+	
+	public static ObjectMapper getObjMapper(){
+		ObjectMapper om = new ObjectMapper();
+		om.setSerializationInclusion(Include.NON_NULL);
+		om.enable(SerializationFeature.INDENT_OUTPUT);
+		return om;
 	}
 		
 }

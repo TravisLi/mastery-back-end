@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -23,11 +26,11 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import mastery.model.Lesson;
@@ -42,7 +45,9 @@ import mastery.schooltracs.model.NewMakeupRequest;
 import mastery.schooltracs.model.SearchActivityRequest;
 import mastery.schooltracs.model.StaffWorkHourRequest;
 import mastery.schooltracs.util.SchoolTracsConst;
+import mastery.schooltracs.util.SchoolTracsUtil;
 
+@Service
 public class SchoolTracsConn {
 
 	private static final Logger logger = LoggerFactory.getLogger(SchoolTracsConn.class);
@@ -51,46 +56,46 @@ public class SchoolTracsConn {
 
 	private CookieStore cookieStore;
 
-	private final HttpClient httpClient;
+	private HttpClient httpClient;
 
+	@Value("${schooltracs.sys.uname}")
+	private String uname;
+
+	@Value("${schooltracs.sys.pwd}")
+	private String pwd;
+	
+	private ActionObserver obsver = new ActionObserver();
+	
 	private int reqSeq = 1;
 
 	public SchoolTracsConn() {
+		/*httpClient = HttpClientBuilder.create().build();
+		localContext = HttpClientContext.create();
+		cookieStore = new BasicCookieStore();
+		localContext.setCookieStore(cookieStore);*/
+		Thread t = new Thread(obsver);
+		t.start();
+	}
 
-		/*HttpHost proxy = new HttpHost("judpocproxy.poc.et", 8080);
-		DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
+	@PostConstruct
+	public void login() throws IOException{
 
-		httpClient = HttpClientBuilder.create().setRoutePlanner(routePlanner).build();*/
+		logger.info("Login to SchoolTracs");
 
 		httpClient = HttpClientBuilder.create().build();
 		localContext = HttpClientContext.create();
 		cookieStore = new BasicCookieStore();
 		localContext.setCookieStore(cookieStore);
-	}
-
-	public void login(String username, String password) throws IOException{
-
-		logger.info("Login to SchoolTracs");
-
+		
 		HttpPost post = new HttpPost(SchoolTracsConst.LOGIN_URL);
 
 		List<NameValuePair> nvps = new ArrayList <NameValuePair>();
-		nvps.add(new BasicNameValuePair("username", username));
-		nvps.add(new BasicNameValuePair("password", password));
+		nvps.add(new BasicNameValuePair("username", uname));
+		nvps.add(new BasicNameValuePair("password", pwd));
 		post.setEntity(new UrlEncodedFormEntity(nvps));
-		HttpResponse r = httpClient.execute(post, localContext);
-
+		HttpResponse r = this.excuteClient(post);
+		reqSeq = 1;
 		logger.info("response status code=" + r.getStatusLine().getStatusCode());
-
-		//HttpEntity entity2 = r.getEntity();
-		/*List<Cookie> cookies = cookieStore.getCookies();
-		for (int i = 0; i < cookies.size(); i++) {
-			logger.info("Local cookie: " + cookies.get(i));
-		}*/
-
-		// do something useful with the response body
-		// and ensure it is fully consumed
-		//EntityUtils.consume(entity2);
 
 	}
 	
@@ -226,7 +231,49 @@ public class SchoolTracsConn {
 
 	private HttpResponse excuteClient(HttpPost post) throws ClientProtocolException, IOException{
 		reqSeq++;
+		this.obsver.actionPerformed();
 		return httpClient.execute(post, localContext);
+	}
+	
+	private class ActionObserver implements Runnable {
+
+		private Date lastActTime = new Date();
+		
+		@Override
+		public void run() {
+			while(true){
+				Date runTime = new Date();
+				Integer min = SchoolTracsUtil.minDiffBtwDates(runTime, lastActTime);
+				logger.info("lastActTime=" + lastActTime);
+				logger.info("runTime=" + runTime);
+				logger.info("min diff=" + min);
+				try {
+					if(min>=60){
+						login();
+					}else{
+						if(StringUtils.isEmpty(sendFacReq())){
+							logger.info("No response from schooltracs - relogin");
+							login();
+						}
+					}
+				} catch (IOException e) {
+					logger.error(e.getMessage());
+					e.printStackTrace();
+				}
+				try {
+					//sleep for 10 mins
+					Thread.sleep(1000*60*10);
+				} catch (InterruptedException e) {
+					logger.error(e.getMessage());
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		public void actionPerformed(){
+			this.lastActTime = new Date();
+		}
+
 	}
 
 	private static HttpPost prepareHttpJsonPost(String requestUrl, String payload) throws UnsupportedEncodingException{
@@ -286,7 +333,7 @@ public class SchoolTracsConn {
 	
 	private static String buildReqJson(SimpleModule module, Object req) throws JsonProcessingException{
 
-		ObjectMapper om = getObjMapper();
+		ObjectMapper om = SchoolTracsUtil.getObjMapper();
 		om.registerModule(module);
 
 		String json = om.writeValueAsString(req);
@@ -298,7 +345,7 @@ public class SchoolTracsConn {
 	
 	private static String buildReqJson(Object req) throws JsonProcessingException{
 
-		ObjectMapper om = getObjMapper();
+		ObjectMapper om = SchoolTracsUtil.getObjMapper();
 
 		String json = om.writeValueAsString(req);
 
@@ -307,11 +354,4 @@ public class SchoolTracsConn {
 		return json;
 	}
 	
-	private static ObjectMapper getObjMapper(){
-		ObjectMapper om = new ObjectMapper();
-		om.setSerializationInclusion(Include.NON_NULL);
-		om.enable(SerializationFeature.INDENT_OUTPUT);
-		return om;
-	}
-
 }
