@@ -68,11 +68,7 @@ public class SchoolTracsConn {
 	
 	private int reqSeq = 1;
 
-	public SchoolTracsConn() {
-		/*httpClient = HttpClientBuilder.create().build();
-		localContext = HttpClientContext.create();
-		cookieStore = new BasicCookieStore();
-		localContext.setCookieStore(cookieStore);*/
+	public SchoolTracsConn() throws IOException {
 		Thread t = new Thread(obsver);
 		t.start();
 	}
@@ -242,6 +238,15 @@ public class SchoolTracsConn {
 		@Override
 		public void run() {
 			while(true){
+				
+				try {
+					//sleep for 10 mins
+					Thread.sleep(1000*60*10);
+				} catch (InterruptedException e) {
+					logger.error(e.getMessage());
+					e.printStackTrace();
+				}
+				
 				Date runTime = new Date();
 				Integer min = SchoolTracsUtil.minDiffBtwDates(runTime, lastActTime);
 				logger.info("lastActTime=" + lastActTime);
@@ -257,13 +262,6 @@ public class SchoolTracsConn {
 						}
 					}
 				} catch (IOException e) {
-					logger.error(e.getMessage());
-					e.printStackTrace();
-				}
-				try {
-					//sleep for 10 mins
-					Thread.sleep(1000*60*10);
-				} catch (InterruptedException e) {
 					logger.error(e.getMessage());
 					e.printStackTrace();
 				}
