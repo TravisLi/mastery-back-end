@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -98,8 +99,12 @@ public class RestApiController {
 		logger.info("Get Student Lesson Start");
 		logger.info("name="+name+" weekNo="+weekNo);
 		
-		//for demo purpose we date back to march
-		Calendar stCal = MasteryUtil.getPlainCal(new Date());		
+		Calendar stCal = Calendar.getInstance();
+		//if current week, the lesson before now should not be shown
+		if(weekNo>0){
+			stCal = MasteryUtil.getPlainCal(new Date());
+		}
+				
 		Calendar edCal = MasteryUtil.getPlainCal(stCal.getTime());
 		
 		//get a week of class
@@ -126,6 +131,8 @@ public class RestApiController {
 		List<Lesson> list = new ArrayList<Lesson>();
 		
 		list = sAgent.schMkup(lson,stdName);
+		
+		Collections.sort(list);
 		
 		logger.info(list.toString());
 		

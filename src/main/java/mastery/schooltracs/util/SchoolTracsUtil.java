@@ -372,15 +372,8 @@ public class SchoolTracsUtil {
 		logger.debug("Wkhr start Date="+ SchoolTracsConst.SDF_FULL.format(wkhrStDate));
 		logger.debug("Wkhr end Date="+ SchoolTracsConst.SDF_FULL.format(wkhrEdDate));
 		
-		Date stComp = wkhrStDate;
-		
-		if(lsons.size()==0){
-			list.add(new FreeTimeslot(wkhrStDate, wkhrEdDate));
-			return list;
-		}
-		
-		boolean isAllLsonBeforeWkhr = true;
-		
+		Date anchorDate = wkhrStDate;
+				
 		for(int i=0;i<lsons.size();i++){
 			
 			Lesson l = lsons.get(i);
@@ -388,7 +381,24 @@ public class SchoolTracsUtil {
 			logger.debug("Lesson l = " + l.toString());
 			
 			//only cares about lesson within working hour
-			if(l.getStartDateTime().after(wkhrStDate)||l.getStartDateTime().equals(wkhrStDate)){
+			if(!((l.getStartDateTime().after(wkhrStDate)||l.getStartDateTime().equals(wkhrStDate))&&l.getStartDateTime().before(wkhrEdDate))){
+				logger.debug("lesson is not within the working hour - skip");
+				//break;
+			}else{
+				if(l.getStartDateTime().after(anchorDate)){
+					FreeTimeslot t1 = new FreeTimeslot();
+					//intended to new a date to prevent pass by reference change
+					Date startDateTime = new Date();
+					startDateTime.setTime(anchorDate.getTime());
+					t1.setStartDateTime(startDateTime);
+					t1.setEndDateTime(l.getStartDateTime());
+					list.add(t1);
+				}
+				
+				anchorDate = l.getEndDateTime();
+			}
+				
+			/*if(l.getStartDateTime().after(wkhrStDate)||l.getStartDateTime().equals(wkhrStDate)){
 				isAllLsonBeforeWkhr = false;
 				FreeTimeslot t1 = new FreeTimeslot();
 				Date startDateTime = new Date();
@@ -417,13 +427,17 @@ public class SchoolTracsUtil {
 						list.add(t2);
 					}
 				}
-			}	
+			}	*/
+		}
+		
+		if(anchorDate.before(wkhrEdDate)){
+			list.add(new FreeTimeslot(anchorDate, wkhrEdDate));
 		}
 		
 		//if all lessons are before working hour, the whole working hour will be free timeslot
-		if(isAllLsonBeforeWkhr){
+		/*if(isAllLsonBeforeWkhr){
 			list.add(new FreeTimeslot(wkhrStDate, wkhrEdDate));
-		}
+		}*/
 		
 		return list;
 		

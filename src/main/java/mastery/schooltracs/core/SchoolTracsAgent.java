@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -395,7 +394,9 @@ public class SchoolTracsAgent {
 		//room-date Hash
 		HashMap<String, List<Lesson>> rdLsonHash = new HashMap<String, List<Lesson>>();
 		
-		Calendar todayCal = MasteryUtil.getPlainCal(new Date());
+		Date currentDateTime = new Date();
+		
+		Calendar todayCal = MasteryUtil.getPlainCal(currentDateTime);
 
 		Calendar stCal = MasteryUtil.getPlainCal(src.getStartDateTime());
 
@@ -415,6 +416,12 @@ public class SchoolTracsAgent {
 		edCal.add(Calendar.DAY_OF_MONTH, 6);
 
 		Date stDate = stCal.getTime();
+		
+		//prevent the lesson with start time early then current date time shown
+		if(stCal.equals(todayCal)){
+			stDate = currentDateTime;
+		}
+		
 		Date edDate = edCal.getTime();
 
 		Teacher t = src.getTeacher();
@@ -509,8 +516,6 @@ public class SchoolTracsAgent {
 			e.printStackTrace();
 		}
 		
-		Collections.sort(rstLsons);
-
 		return rstLsons;
 	}
 
