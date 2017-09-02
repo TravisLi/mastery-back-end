@@ -1,13 +1,12 @@
 package mastery.controller;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import mastery.model.Auth;
+import mastery.model.Lesson;
+import mastery.model.User;
+import mastery.schooltracs.core.SchoolTracsAgent;
+import mastery.schooltracs.model.Customer;
+import mastery.util.MasteryUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.slf4j.Logger;
@@ -15,21 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import mastery.model.Auth;
-import mastery.model.Lesson;
-import mastery.model.User;
-import mastery.schooltracs.core.SchoolTracsAgent;
-import mastery.schooltracs.model.Customer;
-import mastery.util.MasteryUtil;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 @CrossOrigin(maxAge = 4800, allowCredentials = "false") 
 @RestController
@@ -40,6 +29,11 @@ public class RestApiController {
 	
 	@Autowired
 	private SchoolTracsAgent sAgent;
+
+	@RequestMapping(value = "/check", method = RequestMethod.GET)
+	public ResponseEntity<Boolean> check() {
+		return new ResponseEntity<>(true, HttpStatus.OK);
+	}
 		
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public ResponseEntity<User> login(@RequestBody Auth auth){
