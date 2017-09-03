@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import mastery.schooltracs.model.Activity;
 import mastery.schooltracs.util.SchoolTracsConst;
-import mastery.schooltracs.util.SchoolTracsConst.Level;
 import mastery.schooltracs.util.SchoolTracsUtil;
 
 public class Lesson implements Comparable<Lesson>  {
@@ -68,8 +67,6 @@ public class Lesson implements Comparable<Lesson>  {
 		this.startDateTime = SchoolTracsConst.SDF_FULL.parse(startDateStr);
 		this.endDateTime = SchoolTracsConst.SDF_FULL.parse(endDateStr);
 	}
-	
-	
 	
 	public String getId() {
 		return id;
