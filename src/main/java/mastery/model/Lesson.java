@@ -24,6 +24,7 @@ public class Lesson implements Comparable<Lesson>  {
 	private Date startDateTime;
 	private Date endDateTime;
 	private String centerId;
+	private String category;
 	private Room room;
 	private Teacher teacher;
 	private List<Student> students = new ArrayList<Student>();
@@ -44,24 +45,11 @@ public class Lesson implements Comparable<Lesson>  {
 		//this.students = l.getStudents();
 	}
 
-	public Lesson(String id, String name, Level frLvl, Level toLvl, Date startDateTime, Date endDateTime,
-			Teacher teacher, List<Student> students, Room room) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.frLvl = frLvl;
-		this.toLvl = toLvl;
-		this.startDateTime = startDateTime;
-		this.endDateTime = endDateTime;
-		this.teacher = teacher;
-		this.students = students;
-		this.room = room;
-	}
-
 	public Lesson(Activity act) throws ParseException{
 		this.id = act.getId();
 		this.name = act.getName();
 		this.centerId = act.getCenterId();
+		this.category = act.getCategory();
 		String[] lvls= act.getLevel().split("-");
 		if(lvls.length==2){
 			frLvl = SchoolTracsUtil.classifyLevel(lvls[0]);
@@ -137,6 +125,14 @@ public class Lesson implements Comparable<Lesson>  {
 
 	public void setCenterId(String centerId) {
 		this.centerId = centerId;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
 
 	public Room getRoom() {
