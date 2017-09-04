@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
@@ -308,6 +309,96 @@ public class SchoolTracsAgent {
 		}
 
 		return map;
+	}
+	
+	//service
+	public Boolean updateUserPwd(String custId, String oldPwd, String newPwd){
+		
+		Customer c;
+		try {
+			c = this.schCustsById(custId);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
+				
+		if(!c.getBarCode().equals(oldPwd)){
+			return false;
+		}
+		
+		Customer cust = new Customer();
+		cust.setId(c.getId());
+		cust.setBarCode(newPwd);
+		
+		Boolean result = this.updateCustInfo(cust);
+		
+		if(result){
+			Runnable msgTask = new Runnable(){
+
+				@Override
+				public void run() {
+					wAgent.sendChgPwdMsg(c.getName(), c.getMobile());
+				}
+			};
+			
+			Thread t = new Thread(msgTask);
+			t.start();
+		}
+		
+		return result;
+	}
+	
+	
+	public Boolean openOnlineService(String stdName, String phone, String mobile){
+		
+		List<Customer> custs = schCustsByPhone(phone);
+		
+		if(custs.isEmpty()){
+			logger.info("cannot find customer by phone");
+			return false;
+		}
+			
+		if(custs.size()>1){
+			logger.info("More than one customer is found");
+			return false;
+		}
+			
+		Customer cust = custs.get(0);
+		
+		if(!cust.getName().contains(stdName)){
+			logger.info("Customer name does not contain input name");
+			return false;
+		}
+		
+		if(StringUtils.isNotEmpty(cust.getBarCode())){
+			logger.info("service already opened");
+			return false;
+		}
+		
+		String pw = MasteryUtil.pwGen();
+		
+		Customer c = new Customer();
+		c.setId(cust.getId());
+		c.setMobile(cust.getMobile());
+		c.setBarCode(pw);
+		
+		Boolean result = this.updateCustInfo(cust);
+		
+		if(result){
+			Runnable msgTask = new Runnable(){
+
+				@Override
+				public void run() {
+					wAgent.sendOpenOnlineSrvMsg(stdName, mobile, pw);
+				}
+			};
+			
+			Thread t = new Thread(msgTask);
+			t.start();
+		}
+		
+		return result;
 	}
 	
 	//make up

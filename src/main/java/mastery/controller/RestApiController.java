@@ -32,7 +32,7 @@ public class RestApiController {
 
 	@RequestMapping(value = "/check", method = RequestMethod.GET)
 	public ResponseEntity<Boolean> check() {
-		return new ResponseEntity<>(true, HttpStatus.OK);
+		return new ResponseEntity<Boolean>(true, HttpStatus.OK);
 	}
 		
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -63,28 +63,23 @@ public class RestApiController {
 		
 	}
 	
+	@RequestMapping(value = "/user/open/{name}/{phone}/{mobile}", method = RequestMethod.GET)
+	public ResponseEntity<Boolean> openService(@PathVariable("name")String name, @PathVariable("phone")String phone, @PathVariable("mobile")String mobile){
+		logger.info("Open Service");
+		logger.info("name="+name);
+		logger.info("phone="+phone);
+		logger.info("mobile="+mobile);
+				
+		return new ResponseEntity<Boolean>(sAgent.openOnlineService(name, phone, mobile), HttpStatus.OK);
+		
+	}
+	
+	
 	@RequestMapping(value = "/user/updatepwd/{custId}/{oldPwd}/{newPwd}", method = RequestMethod.GET)
 	public ResponseEntity<Boolean> updateUserPwd(@PathVariable("custId")String custId, @PathVariable("oldPwd")String oldPwd, @PathVariable("newPwd")String newPwd){
 		logger.info("Update User Password");
-		
-		Customer c;
-		try {
-			c = sAgent.schCustsById(custId);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			e.printStackTrace();
-			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
-		}
 				
-		if(!c.getBarCode().equals(oldPwd)){
-			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
-		}
-		
-		Customer cust = new Customer();
-		cust.setId(c.getId());
-		cust.setBarCode(newPwd);
-		
-		return new ResponseEntity<Boolean>(sAgent.updateCustInfo(cust), HttpStatus.OK);
+		return new ResponseEntity<Boolean>(sAgent.updateUserPwd(custId, oldPwd, newPwd), HttpStatus.OK);
 		
 	}
 	
@@ -160,5 +155,5 @@ public class RestApiController {
 		
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
-
+	
 }

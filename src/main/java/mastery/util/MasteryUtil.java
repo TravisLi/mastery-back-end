@@ -2,6 +2,9 @@ package mastery.util;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
+
+import org.apache.commons.lang3.StringUtils;
 
 import mastery.model.Lesson;
 import mastery.schooltracs.util.SchoolTracsConst;
@@ -44,5 +47,15 @@ public class MasteryUtil {
 	
 	public static SchoolTracsConst.Level nullGuard(SchoolTracsConst.Level src){
 		return src!=null?src:SchoolTracsConst.Level.NONE;
+	}
+	
+	public static String pwGen(){
+		Random r = new Random();
+		String s = StringUtils.EMPTY;
+		for(int i=0;i<7;i++){
+			Integer d = r.nextInt(10);
+			s += d.toString();
+		}
+		return s;
 	}
 }

@@ -27,6 +27,8 @@ public class WhatsappAgent {
 	private static final String MKUP_MSG_TMP_TCH = "致%s老師\n你的學生%s將課堂:\n%s\n%s\n%s\n轉至\n%s\n%s\n%s\n敬請留意!";
 	private static final String MKUP_MSG_TMP_ADM = "致校務管理員\n學生%s將課堂:\n%s\n%s\n%s\n%s\n轉至\n%s\n%s\n%s\n%s\n敬請留意!";
 	private static final String MKUP_MSG_TMP_STD = "致%s同學\n你己成功將課堂:\n%s\n%s\n%s\n%s\n轉至\n%s\n%s\n%s\n%s";
+	private static final String OPEN_SRV_MSG_TMP = "致%s同學\n歡迎使用碩士教室(愛民)課堂系統!\n你的賬戶現已啟用，登入密碼為%s。";
+	private static final String CHG_PWD_MSG_TMP = "致%s同學\n你的登入密碼已成功更新。";
 	private static final String MOBILE_REGEX = "^[965][0-9]{7}";
 
 	public void sendMkupTchMsg(Staff s, String stdName, Lesson frLson, Lesson toLson){
@@ -69,17 +71,38 @@ public class WhatsappAgent {
 		String msg = this.buildMkupStdMsg(c.getName(), frLson.getName(), toLson.getName(), frLson.getRoom().getName(), toLson.getRoom().getName(), frLson.getTeacher().getName(), toLson.getTeacher().getName(), frLsonDt, toLsonDt);
 
 		if(this.sendMsg(c.getMobile(), msg)){
-			logger.info("Send msg to studet mobile success!");
+			logger.info("Send msg to student mobile success!");
 		}else{
 			logger.warn("Send msg to student mobile fail!");
 		}
 
-		if(this.sendMsg(c.getContact1Phone(), msg)){
-			logger.info("Send msg to student contact 1 phone success!");
+		/*if(this.sendMsg(c.getContact1Phone(), msg)){
+			logger.info("Send msg to student contact1 phone success!");
 		}else{
 			logger.warn("Send msg to student contact1 phone fail!");
-		}
+		}*/
 
+	}
+	
+	public void sendOpenOnlineSrvMsg(String stdName, String mobile, String pw){
+		String msg = this.buildOpenSrvMsg(stdName, pw);
+		
+		if(this.sendMsg(mobile, msg)){
+			logger.info("Send open online service msg to student mobile success!");
+		}else{
+			logger.info("Send open online service msg to student mobile fail!");
+		}
+		
+	}
+	
+	public void sendChgPwdMsg(String stdName, String mobile){
+		String msg = this.buildChgPwdMsg(stdName);
+		
+		if(this.sendMsg(mobile, msg)){
+			logger.info("Send change pwd msg to student mobile success!");
+		}else{
+			logger.info("Send change pwd service msg to student mobile fail!");
+		}
 	}
 
 	private String buildMkupTchMsg(String stdName, String tchName, String frLsonName, String toLsonName, String frLsonRm, String toLsonRm, String frLsonDt, String toLsonDt){
@@ -92,6 +115,14 @@ public class WhatsappAgent {
 
 	private String buildMkupStdMsg(String stdName, String frLsonName, String toLsonName, String frLsonRm, String toLsonRm, String frLsonTch, String toLsonTch, String frLsonDt, String toLsonDt){
 		return String.format(MKUP_MSG_TMP_STD, stdName, frLsonName, frLsonTch, frLsonRm, frLsonDt, toLsonName, toLsonTch, toLsonRm, toLsonDt);
+	}
+	
+	private String buildOpenSrvMsg(String stdName, String pw){
+		return String.format(OPEN_SRV_MSG_TMP, stdName, pw);
+	}
+	
+	private String buildChgPwdMsg(String stdName){
+		return String.format(CHG_PWD_MSG_TMP, stdName);
 	}
 
 	private String[] buildSendMsgCmd(String ctatNo, String msg){
