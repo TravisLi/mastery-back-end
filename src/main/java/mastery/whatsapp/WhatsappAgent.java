@@ -84,13 +84,13 @@ public class WhatsappAgent {
 
 	}
 	
-	public void sendOpenOnlineSrvMsg(String stdName, String mobile, String pw){
+	public void sendActivateMsg(String stdName, String mobile, String pw){
 		String msg = this.buildOpenSrvMsg(stdName, pw);
 		
 		if(this.sendMsg(mobile, msg)){
-			logger.info("Send open online service msg to student mobile success!");
+			logger.info("Send activate msg success!");
 		}else{
-			logger.info("Send open online service msg to student mobile fail!");
+			logger.info("Send activate msg fail!");
 		}
 		
 	}

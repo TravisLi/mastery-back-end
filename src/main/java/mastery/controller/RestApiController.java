@@ -63,14 +63,14 @@ public class RestApiController {
 		
 	}
 	
-	@RequestMapping(value = "/user/open/{name}/{phone}/{mobile}", method = RequestMethod.GET)
-	public ResponseEntity<Boolean> openService(@PathVariable("name")String name, @PathVariable("phone")String phone, @PathVariable("mobile")String mobile){
-		logger.info("Open Service");
+	@RequestMapping(value = "/user/activate/{name}/{phone}/{mobile}", method = RequestMethod.GET)
+	public ResponseEntity<Boolean> activate(@PathVariable("name")String name, @PathVariable("phone")String phone, @PathVariable("mobile")String mobile){
+		logger.info("Activiate Service");
 		logger.info("name="+name);
 		logger.info("phone="+phone);
 		logger.info("mobile="+mobile);
 				
-		return new ResponseEntity<Boolean>(sAgent.openOnlineService(name, phone, mobile), HttpStatus.OK);
+		return new ResponseEntity<Boolean>(sAgent.activate(name, phone, mobile), HttpStatus.OK);
 		
 	}
 	

@@ -52,7 +52,7 @@ public class MasteryUtil {
 	public static String pwGen(){
 		Random r = new Random();
 		String s = StringUtils.EMPTY;
-		for(int i=0;i<7;i++){
+		for(int i=0;i<6;i++){
 			Integer d = r.nextInt(10);
 			s += d.toString();
 		}

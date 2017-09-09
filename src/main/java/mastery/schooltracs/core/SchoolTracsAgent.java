@@ -350,7 +350,7 @@ public class SchoolTracsAgent {
 	}
 	
 	
-	public Boolean openOnlineService(String stdName, String phone, String mobile){
+	public Boolean activate(String stdName, String phone, String mobile){
 		
 		List<Customer> custs = schCustsByPhone(phone);
 		
@@ -383,14 +383,14 @@ public class SchoolTracsAgent {
 		c.setMobile(cust.getMobile());
 		c.setBarCode(pw);
 		
-		Boolean result = this.updateCustInfo(cust);
+		Boolean result = this.updateCustInfo(c);
 		
 		if(result){
 			Runnable msgTask = new Runnable(){
 
 				@Override
 				public void run() {
-					wAgent.sendOpenOnlineSrvMsg(stdName, mobile, pw);
+					wAgent.sendActivateMsg(stdName, mobile, pw);
 				}
 			};
 			
