@@ -3,7 +3,7 @@ sudo: required
 language: java
 
 service:
-	-docker
+ - docker
 	
 before install:
-	-docker build -t Dockerfile
+ - docker build -t Dockerfile
