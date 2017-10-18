@@ -5,5 +5,5 @@ language: java
 service:
  - docker
 
-before install:
+script:
  - docker build -t Dockerfile
