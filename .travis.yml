@@ -10,3 +10,4 @@ script:
  
 after_success:
   - docker login -u="$docker.username" -p="$docker.password" coolki.myqnapcloud.com
+  - docker push mastery-back-end
