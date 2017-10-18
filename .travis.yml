@@ -4,6 +4,6 @@ language: java
 
 service:
  - docker
-	
+
 before install:
  - docker build -t Dockerfile
