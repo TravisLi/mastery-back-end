@@ -7,3 +7,6 @@ service:
 
 script:
  - docker build -t mastery-back-end .
+ 
+after_success:
+  - docker login -u="$docker.username" -p="$docker.password" coolki.myqnapcloud.com
