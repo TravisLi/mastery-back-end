@@ -6,4 +6,4 @@ service:
  - docker
 
 script:
- - docker build -t Dockerfile
+ - docker build -t mastery-back-end
