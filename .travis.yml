@@ -7,10 +7,8 @@ service:
 
 before_script:
  - mkdir -pv ~/.docker
- - wget https://raw.githubusercontent.com/TravisLi/mastery-back-end/Travis_CI/cert/ca.pem
- - wget https://raw.githubusercontent.com/TravisLi/mastery-back-end/Travis_CI/cert/cert.pem
- - wget https://raw.githubusercontent.com/TravisLi/mastery-back-end/Travis_CI/cert/key.pem
- - cp -v {ca,cert,key}.pem ~/.docker
+ - wget https://github.com/TravisLi/mastery-back-end/raw/Travis_CI/cert/cert.zip
+ - unzip cert.zip -d ~/.docker
  - export DOCKER_HOST=tcp://coolki.myqnapcloud.com:2376 DOCKER_TLS_VERIFY=1
 
 script:
