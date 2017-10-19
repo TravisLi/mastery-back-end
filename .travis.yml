@@ -5,9 +5,16 @@ language: java
 service:
  - docker
 
+before_script:
+ - mkdir -pv ~/.docker
+ - wget https://github.com/TravisLi/mastery-back-end/tree/Travis_CI/cert/ca.pem ~/.docker
+ - wget https://github.com/TravisLi/mastery-back-end/tree/Travis_CI/cert/cert.pem ~/.docker
+ - wget https://github.com/TravisLi/mastery-back-end/tree/Travis_CI/cert/key.pem ~/.docker
+ - export DOCKER_HOST=tcp://coolki.myqnapcloud.com:2376 DOCKER_TLS_VERIFY=1
+
 script:
  - docker build -t mastery-back-end .
  
 after_success:
-  - docker login -u="$docker_username" -p="$docker_password" coolki.myqnapcloud.com
-  - docker push mastery-back-end
+ - docker login -u="$docker_username" -p="$docker_password" coolki.myqnapcloud.com
+ - docker push mastery-back-end
