@@ -7,12 +7,11 @@ service:
 
 before_script:
  - mkdir -pv ~/.docker
- - cd .docker
  - wget https://raw.githubusercontent.com/TravisLi/mastery-back-end/Travis_CI/cert/ca.pem .
  - wget https://raw.githubusercontent.com/TravisLi/mastery-back-end/Travis_CI/cert/cert.pem .
  - wget https://raw.githubusercontent.com/TravisLi/mastery-back-end/Travis_CI/cert/key.pem .
+ - cp -v {ca,cert,key}.pem ~/.docker
  - export DOCKER_HOST=tcp://coolki.myqnapcloud.com:2376 DOCKER_TLS_VERIFY=1
- - cd ..
 
 script:
  - docker build -t mastery-back-end .
