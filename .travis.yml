@@ -17,5 +17,5 @@ script:
  - docker build -t mastery-back-end .
  
 after_success:
- - docker login -u="$docker_username" -p="$docker_password" --tlsverify coolki.myqnapcloud.com
+ - docker login -u="$docker_username" -p="$docker_password" coolki.myqnapcloud.com
  - docker push mastery-back-end
