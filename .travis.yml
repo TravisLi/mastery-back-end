@@ -11,7 +11,7 @@ before_script:
  - export DOCKER_API_VERSION=1.23
  
 script:
- - docker build -t mastery-back-end .
+ - docker build -t --tlsverify mastery-back-end .
  
 after_success:
  - docker login -u="$docker_username" -p="$docker_password" --tlsverify coolki.myqnapcloud.com
