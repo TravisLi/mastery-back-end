@@ -17,5 +17,5 @@ after_success:
  - export DOCKER_HOST=tcp://coolki.myqnapcloud.com:2376 DOCKER_TLS_VERIFY=1
  - export DOCKER_CERT_PATH=~/.docker
  - export DOCKER_API_VERSION=1.23
- - docker tag mastery-back-end coolki.myqnapcloud.com:2376/mastery-back-end
- - docker push coolki.myqnapcloud.com:2376/mastery-back-end
+ - docker tag mastery-back-end coolki.myqnapcloud.com:2376/mastery-back-end:latest
+ - docker push coolki.myqnapcloud.com:2376/mastery-back-end:latest
