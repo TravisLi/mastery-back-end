@@ -6,12 +6,12 @@ before_script:
  - mkdir -pv ~/.docker
  - wget https://github.com/TravisLi/mastery-back-end/raw/Travis_CI/cert/cert.zip
  - unzip cert.zip -d ~/.docker
- - export DOCKER_HOST=tcp://coolki.myqnapcloud.com:2376
+ - export DOCKER_HOST=tcp://coolki.myqnapcloud.com:2376 DOCKER_TLS_VERIFY=1
  - export DOCKER_CERT_PATH=~/.docker
  - export DOCKER_API_VERSION=1.23
  
 script:
- - docker build -t --tlsverify mastery-back-end .
+ - docker build -t mastery-back-end .
  
 after_success:
  - docker login -u="$docker_username" -p="$docker_password" --tlsverify coolki.myqnapcloud.com
