@@ -1,4 +1,4 @@
-sudo: required女弓弓弓弓弓
+sudo: required
 service:
  - docker
 
