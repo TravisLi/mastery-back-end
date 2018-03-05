@@ -9,8 +9,6 @@ RUN apk add --update \
     	musl-dev && \
         pip install yowsup2
 
-ADD 85269736660 /root/.yowsup/85269736660
-
 RUN apk --update add tzdata && \
     cp /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime && \
     apk del tzdata && \
