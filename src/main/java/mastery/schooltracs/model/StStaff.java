@@ -3,6 +3,7 @@ package mastery.schooltracs.model;
 public class StStaff {
 
 	private String id;
+	private String _srid;
 	private String uid;
 	private String fullName;
 	private String localName;
@@ -22,10 +23,10 @@ public class StStaff {
 	private String baseSalary;
 	private String defaultFixPay;
 	private String defaultCommission;
-	private String weekdayRate;
-	private String weekendRate;
-	private String weekdayQuota;
-	private String weekendQuota;
+	private String weekDayRate;
+	private String weekEndRate;
+	private String weekDayQuota;
+	private String weekEndQuota;
 	private String overheadRate;
 	private String sync;
 	private String googleId;
@@ -39,12 +40,17 @@ public class StStaff {
 	private Boolean deleted;
 	private String oid;
 	private String roleName;
-	
 	public String getId() {
 		return id;
 	}
 	public void setId(String id) {
 		this.id = id;
+	}
+	public String get_srid() {
+		return _srid;
+	}
+	public void set_srid(String _srid) {
+		this._srid = _srid;
 	}
 	public String getUid() {
 		return uid;
@@ -160,29 +166,29 @@ public class StStaff {
 	public void setDefaultCommission(String defaultCommission) {
 		this.defaultCommission = defaultCommission;
 	}
-	public String getWeekdayRate() {
-		return weekdayRate;
+	public String getWeekDayRate() {
+		return weekDayRate;
 	}
-	public void setWeekdayRate(String weekdayRate) {
-		this.weekdayRate = weekdayRate;
+	public void setWeekDayRate(String weekDayRate) {
+		this.weekDayRate = weekDayRate;
 	}
-	public String getWeekendRate() {
-		return weekendRate;
+	public String getWeekEndRate() {
+		return weekEndRate;
 	}
-	public void setWeekendRate(String weekendRate) {
-		this.weekendRate = weekendRate;
+	public void setWeekEndRate(String weekEndRate) {
+		this.weekEndRate = weekEndRate;
 	}
-	public String getWeekdayQuota() {
-		return weekdayQuota;
+	public String getWeekDayQuota() {
+		return weekDayQuota;
 	}
-	public void setWeekdayQuota(String weekdayQuota) {
-		this.weekdayQuota = weekdayQuota;
+	public void setWeekDayQuota(String weekDayQuota) {
+		this.weekDayQuota = weekDayQuota;
 	}
-	public String getWeekendQuota() {
-		return weekendQuota;
+	public String getWeekEndQuota() {
+		return weekEndQuota;
 	}
-	public void setWeekendQuota(String weekendQuota) {
-		this.weekendQuota = weekendQuota;
+	public void setWeekEndQuota(String weekEndQuota) {
+		this.weekEndQuota = weekEndQuota;
 	}
 	public String getOverheadRate() {
 		return overheadRate;
@@ -262,5 +268,5 @@ public class StStaff {
 	public void setRoleName(String roleName) {
 		this.roleName = roleName;
 	}
-	
+		
 }

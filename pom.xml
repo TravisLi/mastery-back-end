@@ -52,6 +52,11 @@
 			<artifactId>selenium-chrome-driver</artifactId>
 			<version>3.11.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-api</artifactId>
+			<version>3.11.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

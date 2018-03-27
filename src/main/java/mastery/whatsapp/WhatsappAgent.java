@@ -1,21 +1,20 @@
 package mastery.whatsapp;
 
-import mastery.model.Lesson;
-import mastery.model.Staff;
-import mastery.schooltracs.model.Customer;
-import mastery.util.MasteryUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+
+import mastery.model.Lesson;
+import mastery.model.Staff;
+import mastery.schooltracs.model.Customer;
+import mastery.util.MasteryUtil;
+
 public class WhatsappAgent {
 
 	private static final Logger logger = LoggerFactory.getLogger(WhatsappAgent.class);

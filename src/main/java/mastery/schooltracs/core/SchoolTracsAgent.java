@@ -53,7 +53,7 @@ import mastery.schooltracs.model.StaffWorkHour;
 import mastery.schooltracs.util.SchoolTracsConst;
 import mastery.schooltracs.util.SchoolTracsUtil;
 import mastery.util.MasteryUtil;
-import mastery.whatsapp.WhatsappAgent;
+import mastery.whatsapp.WhatsappWebAgent;
 
 @Service
 public class SchoolTracsAgent {
@@ -72,7 +72,7 @@ public class SchoolTracsAgent {
 	private SchoolTracsConn conn;
 	
 	@Autowired
-	private WhatsappAgent wAgent;
+	private WhatsappWebAgent wAgent;
 	
 	@Value("${schooltracs.sys.uname}")
 	private String uname;
@@ -338,7 +338,9 @@ public class SchoolTracsAgent {
 
 				@Override
 				public void run() {
+					
 					wAgent.sendChgPwdMsg(c.getName(), c.getMobile());
+										
 				}
 			};
 			
@@ -390,7 +392,9 @@ public class SchoolTracsAgent {
 
 				@Override
 				public void run() {
+					
 					wAgent.sendActivateMsg(stdName, mobile, pw);
+										
 				}
 			};
 			
@@ -785,7 +789,9 @@ public class SchoolTracsAgent {
 		wAgent.sendMkupTchMsg(s, c.getName(), frLson, toLson);
 		
 		for(Staff a: this.adminList){
+			
 			wAgent.sendMkupAdmMsg(a, c.getName(), frLson, toLson);
+			
 		}
 	}
 
