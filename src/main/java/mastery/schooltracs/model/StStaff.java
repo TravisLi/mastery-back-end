@@ -1,5 +1,9 @@
 package mastery.schooltracs.model;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class StStaff {
 
 	private String id;
@@ -40,6 +44,9 @@ public class StStaff {
 	private Boolean deleted;
 	private String oid;
 	private String roleName;
+	@JsonProperty("StaffRole")
+	private List<StaffRole> staffRole;
+	
 	public String getId() {
 		return id;
 	}
@@ -268,5 +275,14 @@ public class StStaff {
 	public void setRoleName(String roleName) {
 		this.roleName = roleName;
 	}
+	public List<StaffRole> getStaffRole() {
+		return staffRole;
+	}
+	public void setStaffRole(List<StaffRole> staffRole) {
+		this.staffRole = staffRole;
+	}
+
+
+
 		
 }

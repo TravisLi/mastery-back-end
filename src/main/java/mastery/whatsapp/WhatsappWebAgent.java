@@ -35,7 +35,6 @@ import mastery.model.Lesson;
 import mastery.model.Staff;
 import mastery.schooltracs.model.Customer;
 
-@Service
 public class WhatsappWebAgent {
 
 	private static final Logger logger = LoggerFactory.getLogger(WhatsappWebAgent.class);

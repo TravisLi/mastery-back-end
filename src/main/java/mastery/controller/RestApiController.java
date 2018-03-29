@@ -30,7 +30,7 @@ import mastery.model.User;
 import mastery.schooltracs.core.SchoolTracsAgent;
 import mastery.schooltracs.model.Customer;
 import mastery.util.MasteryUtil;
-import mastery.whatsapp.WhatsappWebAgent;
+import mastery.whatsapp.WhatsappRestAgent;
 
 @CrossOrigin(maxAge = 4800, allowCredentials = "false") 
 @RestController
@@ -39,16 +39,11 @@ public class RestApiController {
 
 	public static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
 	
-	@Autowired
-	private WhatsappWebAgent wAgent;
+	@Autowired 
+	WhatsappRestAgent wAgent;
 	
 	@Autowired
 	private SchoolTracsAgent sAgent;
-
-	@RequestMapping(value = "/whatsapp/barcode", method = RequestMethod.GET)
-	public ResponseEntity<String> getWhatsappLoginBarcode() {
-		return new ResponseEntity<String>(wAgent.getLoginBarCode(), HttpStatus.OK);
-	}
 	
 	@RequestMapping(value = "/whatsapp/send/{pwd}/{phoneNo}/{msg}", method = RequestMethod.GET)
 	public ResponseEntity<Boolean> sendWhatsappMsg(@PathVariable("pwd")String pwd,@PathVariable("phoneNo")String phoneNo, @PathVariable("msg")String msg){
@@ -56,7 +51,7 @@ public class RestApiController {
 		logger.info("message="+msg);
 		
 		if(pwd.equals("masteryoim")){
-			new ResponseEntity<Boolean>(wAgent.sendMsg(phoneNo, msg), HttpStatus.OK);
+			return new ResponseEntity<Boolean>(wAgent.sendMsg(phoneNo, msg), HttpStatus.OK);
 		}
 		
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);

@@ -53,7 +53,7 @@ import mastery.schooltracs.model.StaffWorkHour;
 import mastery.schooltracs.util.SchoolTracsConst;
 import mastery.schooltracs.util.SchoolTracsUtil;
 import mastery.util.MasteryUtil;
-import mastery.whatsapp.WhatsappWebAgent;
+import mastery.whatsapp.WhatsappRestAgent;
 
 @Service
 public class SchoolTracsAgent {
@@ -72,7 +72,7 @@ public class SchoolTracsAgent {
 	private SchoolTracsConn conn;
 	
 	@Autowired
-	private WhatsappWebAgent wAgent;
+	private WhatsappRestAgent wAgent;
 	
 	@Value("${schooltracs.sys.uname}")
 	private String uname;
