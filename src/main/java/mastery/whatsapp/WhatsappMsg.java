@@ -7,9 +7,9 @@ import mastery.util.MasteryUtil;
 
 public class WhatsappMsg {
 
-	private static final String MKUP_MSG_TMP_TCH = "致%s老師\r\n你的學生%s將課堂:\r\n%s\n%s\r\n%s\r\n轉至\n%s\r\n%s\r\n%s\r\n敬請留意!";
-	private static final String MKUP_MSG_TMP_ADM = "致校務管理員\r\n學生%s將課堂:\r\n%s\n%s\r\n%s\r\n%s\n轉至\r\n%s\r\n%s\r\n%s\r\n%s\r\n敬請留意!";
-	private static final String MKUP_MSG_TMP_STD = "致%s同學\r\n你己成功將課堂:\r\n%s\n%s\r\n%s\r\n%s\n轉至\r\n%s\r\n%s\r\n%s\n%s";
+	private static final String MKUP_MSG_TMP_TCH = "致%s老師\r\n你的學生%s將課堂:\r\n%s\r\n%s\r\n%s\r\n轉至\n%s\r\n%s\r\n%s\r\n敬請留意!";
+	private static final String MKUP_MSG_TMP_ADM = "致校務管理員\r\n學生%s將課堂:\r\n%s\r\n%s\r\n%s\r\n%s\n轉至\r\n%s\r\n%s\r\n%s\r\n%s\r\n敬請留意!";
+	private static final String MKUP_MSG_TMP_STD = "致%s同學\r\n你己成功將課堂:\r\n%s\n%s\r\n%s\r\n%s\n轉至\r\n%s\r\n%s\r\n%s\r\n%s";
 	private static final String OPEN_SRV_MSG_TMP = "致%s同學\r\n歡迎使用碩士教室(愛民)課堂系統!\r\n你的賬戶現已啟用，登入密碼為%s。";
 	private static final String CHG_PWD_MSG_TMP = "致%s同學\r\n你的登入密碼已成功更新。";
 	
