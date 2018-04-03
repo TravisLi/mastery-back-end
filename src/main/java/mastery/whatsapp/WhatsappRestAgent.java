@@ -24,7 +24,15 @@ public class WhatsappRestAgent {
 	@Value("${whatsapp.server}")
 	private String whatsappServer = "";
 	private static final String SEND_REST_API = "http://%s/sendto/%s/?message=%s";
-
+	private static final String SENDING_MSG = "Sending %s...";
+	private static final String SEND_SUCCESS_MSG = "Send %s success!";
+	private static final String SEND_FAIL_MSG = "Send %s fail!";
+	private static final String ACTIVIATE_MSG = "activiation msg";
+	private static final String CHG_PWD_MSG = "change pwd msg";
+	private static final String MAKEUP_MSG_ADM = "makeup msg to admin";
+	private static final String MAKEUP_MSG_STD = "makeup msg to student";
+	private static final String MAKEUP_MSG_TCH = "makeup msg to teacher";
+		
 	public WhatsappRestAgent(){
 
 	}
@@ -32,67 +40,74 @@ public class WhatsappRestAgent {
 	public WhatsappRestAgent(String server){
 		this.whatsappServer = server;
 	}
+	
+	public void sendMsgTmp(String phoneNo){
+		logger.info("Sending msg template check");
+		
+		String msg = "";
+		
+		msg = WhatsappMsg.buildMsg(WhatsappMsg.ACTIVIATE_MSG_TMP);
+		
+		this.sendMsg(phoneNo, msg, ACTIVIATE_MSG);
+		
+		msg = WhatsappMsg.buildMsg(WhatsappMsg.CHG_PWD_MSG_TMP);
+		
+		this.sendMsg(phoneNo, msg, CHG_PWD_MSG);
+		
+		msg = WhatsappMsg.buildMsg(WhatsappMsg.MKUP_MSG_TMP_ADM);
+		
+		this.sendMsg(phoneNo, msg, MAKEUP_MSG_ADM);
+		
+		msg = WhatsappMsg.buildMsg(WhatsappMsg.MKUP_MSG_TMP_STD);
+		
+		this.sendMsg(phoneNo, msg, MAKEUP_MSG_STD);
+		
+		msg = WhatsappMsg.buildMsg(WhatsappMsg.MKUP_MSG_TMP_TCH);
+		
+		this.sendMsg(phoneNo, msg, MAKEUP_MSG_TCH);
+		
+	}
 
 	public void sendMkupTchMsg(Staff s, String stdName, Lesson frLson, Lesson toLson){
-		logger.info("Sending makeup msg to teacher");
 
-		String msg = WhatsappMsg.buildMkupTchMsg(s, stdName, frLson, toLson);
-
-		if(this.sendMsg(s.getMobile(), msg)){
-			logger.info("Send msg to teacher mobile success!");
-		}else{
-			logger.warn("Send msg to teacher mobile fail!");
-		}
+		this.sendMsg(s.getMobile(), WhatsappMsg.buildMkupTchMsg(s, stdName, frLson, toLson), MAKEUP_MSG_TCH);
 	}
 
 	public void sendMkupAdmMsg(Staff s, String stdName, Lesson frLson, Lesson toLson){
-		logger.info("Sending makeup msg to admin");
 
-		String msg = WhatsappMsg.buildMkupAdmMsg(s, stdName, frLson, toLson);
-
-		if(this.sendMsg(s.getMobile(), msg)){
-			logger.info("Send msg to admin mobile success!");
-		}else{
-			logger.warn("Send msg to admin mobile fail!");
-		}
+		this.sendMsg(s.getMobile(), WhatsappMsg.buildMkupAdmMsg(s, stdName, frLson, toLson), MAKEUP_MSG_ADM);
 
 	}
 
 	public void sendMkupStdMsg(Customer c, Lesson frLson, Lesson toLson){
-		logger.info("Sending makeup msg to student");
 
-		String msg = WhatsappMsg.buildMkupStdMsg(c, frLson, toLson);
-
-		if(this.sendMsg(c.getMobile(), msg)){
-			logger.info("Send msg to student mobile success!");
-		}else{
-			logger.warn("Send msg to student mobile fail!");
-		}
+		this.sendMsg(c.getMobile(), WhatsappMsg.buildMkupStdMsg(c, frLson, toLson), MAKEUP_MSG_STD);
 
 	}
 
 	public void sendActivateMsg(String stdName, String mobile, String pw){
-		logger.info("Sending activate msg to student");
-
-		String msg = WhatsappMsg.buildOpenSrvMsg(stdName, pw);
-
-		if(this.sendMsg(mobile, msg)){
-			logger.info("Send activate msg success!");
-		}else{
-			logger.info("Send activate msg fail!");
-		}
+		
+		this.sendMsg(mobile, WhatsappMsg.buildOpenSrvMsg(stdName, pw), ACTIVIATE_MSG);
 
 	}
 
 	public void sendChgPwdMsg(String stdName, String mobile){
-		logger.info("Sending change password msg to student");
-
-		String msg = WhatsappMsg.buildChgPwdMsg(stdName);
-
-		if(this.sendMsg(mobile, msg)){
-			logger.info("Send change pwd msg to student mobile success!");
+		
+		this.sendMsg(mobile, WhatsappMsg.buildChgPwdMsg(stdName), CHG_PWD_MSG);
+	}
+	
+	public void sendMsg(String phoneNo, String msg, String logMsg){
+		
+		String sendingMsg = String.format(SENDING_MSG, logMsg);
+		String successMsg = String.format(SEND_SUCCESS_MSG, logMsg);
+		String failMsg = String.format(SEND_FAIL_MSG, logMsg);
+		
+		logger.info(sendingMsg);
+		
+		if(this.sendMsg(phoneNo, msg)){
+			logger.info(successMsg);
 		}else{
-			logger.info("Send change pwd service msg to student mobile fail!");
+			logger.info(failMsg);
 		}
 	}
 	
@@ -137,13 +152,5 @@ public class WhatsappRestAgent {
 
 		return false;
 	}
-
-	/*public static void main(String[] args){
-
-		WhatsappRestAgent agent = new WhatsappRestAgent("be.masteryoim.com:8080");
-
-		logger.info(agent.sendMsg("96841163", "testing").toString());
-
-	}*/
 
 }

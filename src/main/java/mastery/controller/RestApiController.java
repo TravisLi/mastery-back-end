@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,6 +39,7 @@ import mastery.whatsapp.WhatsappRestAgent;
 public class RestApiController {
 
 	public static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
+	public static final String DEFAULT_PWD = "masteryoim";
 	
 	@Autowired 
 	WhatsappRestAgent wAgent;
@@ -45,13 +47,25 @@ public class RestApiController {
 	@Autowired
 	private SchoolTracsAgent sAgent;
 	
-	@RequestMapping(value = "/whatsapp/send/{pwd}/{phoneNo}/{msg}", method = RequestMethod.GET)
-	public ResponseEntity<Boolean> sendWhatsappMsg(@PathVariable("pwd")String pwd,@PathVariable("phoneNo")String phoneNo, @PathVariable("msg")String msg){
-		logger.info("phoneNo="+phoneNo);
-		logger.info("message="+msg);
+	@RequestMapping(value = "/send/whatsapp/msg/{pwd}/{phoneNo}", method = RequestMethod.GET)
+	public ResponseEntity<Boolean> sendWhatsappMsg(@PathVariable("pwd")String pwd,@PathVariable("phoneNo")String phoneNo, @RequestParam("msg")String msg){
 		
-		if(pwd.equals("masteryoim")){
+		if(pwd.equals(DEFAULT_PWD)){
 			return new ResponseEntity<Boolean>(wAgent.sendMsg(phoneNo, msg), HttpStatus.OK);
+		}
+		
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		
+	}
+	
+	@RequestMapping(value = "/send/msg/tmp/{pwd}/{phoneNo}", method = RequestMethod.GET)
+	public ResponseEntity<Boolean> sendMsgTmp(@PathVariable("pwd")String pwd,@PathVariable("phoneNo")String phoneNo){
+		
+		if(pwd.equals(DEFAULT_PWD)){
+			
+			wAgent.sendMsgTmp(phoneNo);
+			
+			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
 		}
 		
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
