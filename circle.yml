@@ -32,7 +32,7 @@ jobs:
       - setup_remote_docker
       - run: |
           TAG=1.0.$CIRCLE_BUILD_NUM         
-          docker build -t thcathy/mastery-back-end:latest -t thcathy/mastery-back-end:$TAG -f docker/Dockerfile .
+          docker build -t thcathy/mastery-back-end:latest -t thcathy/mastery-back-end:$TAG -f Dockerfile .
           docker login -u $DOCKER_USER -p $DOCKER_PASS
           docker push thcathy/mastery-back-end:latest
           docker push thcathy/mastery-back-end:$TAG
