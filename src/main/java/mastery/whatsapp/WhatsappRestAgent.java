@@ -1,8 +1,8 @@
 package mastery.whatsapp;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
+import org.apache.catalina.util.URLEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -130,14 +130,8 @@ public class WhatsappRestAgent {
 
 		String encodedMsg = "";
 		
-		try {
-			encodedMsg = URLEncoder.encode(msg, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			logger.error("Message cannot be encoded in UTF-8");
-			e.printStackTrace();
-			return false;
-		}
-		
+		encodedMsg = new URLEncoder().encode(msg, "UTF-8");
+
 		String url = String.format(SEND_REST_API , whatsappServer, phoneNo, encodedMsg);
 		logger.debug("url=" + url);
 		
