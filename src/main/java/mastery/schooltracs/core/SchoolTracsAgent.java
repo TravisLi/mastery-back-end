@@ -169,7 +169,6 @@ public class SchoolTracsAgent {
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("filter[0][field]", "name"));
 		nvps.add(new BasicNameValuePair("filter[0][data][type]", "string"));
-		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
 		nvps.add(new BasicNameValuePair("filter[0][data][value]", name));
 		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
 		nvps.add(new BasicNameValuePair("start", "0"));
@@ -191,7 +190,7 @@ public class SchoolTracsAgent {
 		return null;
 	}
 	
-	private StStaff schStfsById(String id) throws Exception{
+	/*private StStaff schStfsById(String id) throws Exception{
 		logger.info("Search Staff by Id Start");
 		logger.info("id = " + id);
 		
@@ -218,7 +217,7 @@ public class SchoolTracsAgent {
 			e.printStackTrace();
 		}
 		return null;
-	}
+	}*/
 	
 	//Activity
 	private List<FacilityMap> schActFacById(String actId){
@@ -822,11 +821,15 @@ public class SchoolTracsAgent {
 			return;
 		}
 		
-		Staff s = this.getStfFromHash(frLson.getTeacher().getId());
+		Staff s = this.getStfFromHash(frLson.getTeacher().getId(), frLson.getTeacher().getName());
 		
 		wAgent.sendMkupStdMsg(c, frLson, toLson);
 		
-		wAgent.sendMkupTchMsg(s, c.getName(), frLson, toLson);
+		if(s!=null){
+			wAgent.sendMkupTchMsg(s, c.getName(), frLson, toLson);
+		}else{
+			logger.error("Cannot find teacher = " + s + " teacher whatsapp will not be send");
+		}
 		
 		for(Staff a: this.adminList){
 			
