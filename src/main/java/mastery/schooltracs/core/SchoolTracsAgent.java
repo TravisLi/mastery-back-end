@@ -140,12 +140,15 @@ public class SchoolTracsAgent {
 		
 	}
 	
-	private Staff getStfFromHash(String stfId){
+	private Staff getStfFromHash(String stfId, String stfName){
 		if(stfHash.containsKey(stfId)){
 			return stfHash.get(stfId);
 		}else{
 			try {
-				StStaff st = this.schStfsById(stfId);
+				//as the search by id will throw SQL exception
+				//replace by search name here 4 Apr 2018
+				//StStaff st = this.schStfsById(stfId);
+				StStaff st = this.schStfsByName(stfName);
 				if(st!=null){
 					Staff s = new Staff(st);
 					stfHash.put(s.getId(), s);
@@ -159,9 +162,39 @@ public class SchoolTracsAgent {
 		return null;
 	}
 	
+	private StStaff schStfsByName(String name) throws Exception{
+		logger.info("Search Staff by Name Start");
+		logger.info("name = " + name);
+		
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("filter[0][field]", "name"));
+		nvps.add(new BasicNameValuePair("filter[0][data][type]", "string"));
+		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
+		nvps.add(new BasicNameValuePair("filter[0][data][value]", name));
+		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("start", "0"));
+
+		try {
+			
+			List<StStaff> list = digestListReadRspJson(conn.sendStfReq(nvps), StStaff.class);
+			
+			if(list.size()==1){
+				return list.get(0);
+			}else if(list.size()>1){
+				throw new Exception("More than one staff share the same name");
+			}
+			
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	private StStaff schStfsById(String id) throws Exception{
 		logger.info("Search Staff by Id Start");
-
+		logger.info("id = " + id);
+		
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("filter[0][field]", "id"));
 		nvps.add(new BasicNameValuePair("filter[0][data][type]", "numeric"));
@@ -190,7 +223,7 @@ public class SchoolTracsAgent {
 	//Activity
 	private List<FacilityMap> schActFacById(String actId){
 		logger.info("Search Activities Facility by Id");
-	
+		logger.info("actId = " + actId);
 		try {
 
 			return digestListReadRspJson(conn.sendActFacReq(actId), FacilityMap.class);
@@ -206,7 +239,7 @@ public class SchoolTracsAgent {
 	
 	private List<StaffMap> schActStfById(String actId){
 		logger.info("Search Activities Staff by Id");
-	
+		logger.info("actId = " + actId);
 		try {
 
 			return digestListReadRspJson(conn.sendActStfReq(actId), StaffMap.class);
@@ -222,6 +255,7 @@ public class SchoolTracsAgent {
 	
 	private Activity schActById(String actId){
 		logger.info("Search Activities by Id");
+		logger.info("actId = " + actId);
 		
 		try {
 			return digestReadRspJson(conn.sendActReq(actId), Activity.class);			
@@ -236,7 +270,8 @@ public class SchoolTracsAgent {
 	//customer
 	public List<Customer> schCustsByPhone(String phone){
 		logger.info("Search Customer by Phone Start");
-
+		logger.info("phone = " + phone);
+		
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("filter[0][field]", "phone"));
 		nvps.add(new BasicNameValuePair("filter[0][data][type]", "string"));
@@ -257,7 +292,8 @@ public class SchoolTracsAgent {
 	
 	public Customer schCustsById(String id) throws Exception{
 		logger.info("Search Customer by Id Start");
-
+		logger.info("id = " + id);
+		
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("filter[0][field]", "id"));
 		nvps.add(new BasicNameValuePair("filter[0][data][type]", "numeric"));
@@ -297,6 +333,7 @@ public class SchoolTracsAgent {
 	//teacher
 	private HashMap<Integer, WorkHour> getTchWkhr(String tchId){
 		logger.info("Get Teacher Working Hour");
+		logger.info("tchId = " + tchId);
 		HashMap<Integer, WorkHour> map = new HashMap<Integer, WorkHour>();
 
 		try{
@@ -649,6 +686,9 @@ public class SchoolTracsAgent {
 	}
 
 	private Lesson getLsonById(String id){
+		
+		logger.info("Get Lesson by Id Start");
+		logger.info("id = " + id);
 		
 		Activity act = this.schActById(id);
 		
