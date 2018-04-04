@@ -1,7 +1,5 @@
 package mastery.whatsapp;
 
-import java.io.UnsupportedEncodingException;
-
 import org.apache.catalina.util.URLEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
