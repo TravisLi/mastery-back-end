@@ -302,6 +302,32 @@ public class SchoolTracsAgent {
 		return new ArrayList<Customer>();
 
 	}
+	
+	public List<Customer> schCustsByPhoneAndName(String phone, String name){
+		logger.info("Search Customer by Phone Start");
+		logger.info("phone = " + phone);
+
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("filter[0][field]", "phone"));
+		nvps.add(new BasicNameValuePair("filter[0][data][type]", "string"));
+		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
+		nvps.add(new BasicNameValuePair("filter[0][data][value]", phone));
+		nvps.add(new BasicNameValuePair("filter[1][field]", "name"));
+		nvps.add(new BasicNameValuePair("filter[1][data][type]", "string"));
+		nvps.add(new BasicNameValuePair("filter[1][data][value]", name));
+		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("start", "0"));
+
+		try {
+			return digestListReadRspJson(conn.sendCustReq(nvps), Customer.class);
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+
+		return new ArrayList<Customer>();
+
+	}
 
 	//customer
 	public List<Customer> schCustsByPhoneAndBarcode(String phone, String barcode){
@@ -440,9 +466,10 @@ public class SchoolTracsAgent {
 	}
 
 
+	//update the customer check with phone and loose name
 	public Boolean activate(String stdName, String phone, String mobile){
 
-		List<Customer> custs = schCustsByPhone(phone);
+		List<Customer> custs = schCustsByPhoneAndName(phone,stdName);
 
 		if(custs.isEmpty()){
 			logger.info("cannot find customer by phone");
@@ -455,11 +482,6 @@ public class SchoolTracsAgent {
 		}
 
 		Customer cust = custs.get(0);
-
-		if(!cust.getName().contains(stdName)){
-			logger.info("Customer name does not contain input name");
-			return false;
-		}
 
 		if(StringUtils.isNotEmpty(cust.getBarCode())){
 			logger.info("service already opened");
