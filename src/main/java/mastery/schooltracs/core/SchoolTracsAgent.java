@@ -304,8 +304,9 @@ public class SchoolTracsAgent {
 	}
 	
 	public List<Customer> schCustsByPhoneAndName(String phone, String name){
-		logger.info("Search Customer by Phone Start");
+		logger.info("Search Customer by Phone and Name Start");
 		logger.info("phone = " + phone);
+		logger.info("name = " + name);
 
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("filter[0][field]", "phone"));
