@@ -38,8 +38,9 @@ import mastery.whatsapp.WhatsappRestAgent;
 @RequestMapping("/api")
 public class RestApiController {
 
-	public static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
-	public static final String DEFAULT_PWD = "masteryoim";
+	private static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
+	private static final String DEFAULT_PWD = "masteryoim";
+	private static final String PHONE_REGEX = "^[0-9]{8}";
 	
 	@Autowired 
 	WhatsappRestAgent wAgent;
@@ -84,7 +85,13 @@ public class RestApiController {
 			return null;
 		}
 		
-		List<Customer> custs = sAgent.schCustsByPhone(auth.getUsername());
+		if(!auth.getUsername().matches(PHONE_REGEX)){
+			logger.error("Phone No is not in correct format");
+			return null;
+		}
+		
+		
+		List<Customer> custs = sAgent.schCustsByPhoneAndBarcode(auth.getUsername(), auth.getPwd());
 		
 		if(custs.isEmpty()){
 			return null;
@@ -95,10 +102,10 @@ public class RestApiController {
 			return null;
 		}
 		
-		Customer c = custs.get(0);
-		
-		if(auth.getPwd().equals(c.getBarCode())){
-			return new ResponseEntity<User>(new User(c, "student"), HttpStatus.OK); 
+		for(Customer c: custs){
+			if(auth.getPwd().equals(c.getBarCode())){
+				return new ResponseEntity<User>(new User(c, "student"), HttpStatus.OK);
+			}
 		}
 		
 		return null;

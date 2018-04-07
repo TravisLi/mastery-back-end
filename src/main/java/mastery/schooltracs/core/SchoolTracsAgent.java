@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -61,31 +62,31 @@ public class SchoolTracsAgent {
 	private static final Logger logger = LoggerFactory.getLogger(SchoolTracsAgent.class);
 
 	private HashMap<String, Room> rmHash = new HashMap<String, Room>();
-	
+
 	private HashMap<String, Staff> stfHash = new HashMap<String, Staff>();
 
 	private List<Staff> adminList = new ArrayList<Staff>();
-	
+
 	private HashMap<String, Staff> skipHash = new HashMap<String, Staff>();
-	
+
 	@Autowired
 	private SchoolTracsConn conn;
-	
+
 	@Autowired
 	private WhatsappRestAgent wAgent;
-	
+
 	@Value("${schooltracs.sys.uname}")
 	private String uname;
 
 	@Value("${schooltracs.sys.pwd}")
 	private String pwd;
-	
+
 	@Value("${schooltracs.mkup.sch.limit}")
 	private Integer mkupSchLimit;
-	
+
 	@PostConstruct
 	public void init() throws IOException{
-		
+
 		List<Room> rms = this.getRms();
 		for(Room r:rms){
 			if(rmHash.containsKey(r.getId())){
@@ -94,34 +95,46 @@ public class SchoolTracsAgent {
 				rmHash.put(r.getId(), r);
 			}
 		}
-		
+
 		stfHash = this.getStaffs();
 	}
-		
+
+	//reload the staff and rm map for every 30 mins
+	@Scheduled(fixedRate = 180000)
+	public void reload(){
+		logger.info("Scheduled reload start");
+		try {
+			init();
+		} catch (IOException e) {
+			logger.error("reload fail");
+			e.printStackTrace();
+		}
+	}
+
 	//staff
 	public HashMap<String, Staff> getStaffs(){
 		logger.info("Get All SchoolTracs Staffs");
-		
+
 		HashMap<String, Staff> hash = new HashMap<String, Staff>();
-		
+
 		try {
-			
+
 			List<StStaff> list = digestListReadRspJson(conn.sendStfReq(), StStaff.class);
-			
+
 			for(StStaff s: list){
 				if(!s.getDeleted()){
 					Staff stf = new Staff(s);
-					
+
 					if(stf.getConfig().getAdminWapp()){
 						logger.info(stf.getName()+" is added to admin list");
 						this.adminList.add(stf);
 					}
-					
+
 					if(stf.getConfig().getMkupSchSkip()){
 						logger.info(stf.getName()+" is added to skip list");
 						this.skipHash.put(stf.getId(), stf);
 					}
-																			
+
 					logger.debug(stf.toString());
 					if(hash.containsKey(s.getId())){
 						hash.replace(s.getId(), stf);
@@ -130,16 +143,16 @@ public class SchoolTracsAgent {
 					}
 				}	
 			}		
-						
+
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
-		
+
 		return stfHash;
-		
+
 	}
-	
+
 	private Staff getStfFromHash(String stfId, String stfName){
 		if(stfHash.containsKey(stfId)){
 			return stfHash.get(stfId);
@@ -161,11 +174,11 @@ public class SchoolTracsAgent {
 		}
 		return null;
 	}
-	
+
 	private StStaff schStfsByName(String name) throws Exception{
 		logger.info("Search Staff by Name Start");
 		logger.info("name = " + name);
-		
+
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("filter[0][field]", "name"));
 		nvps.add(new BasicNameValuePair("filter[0][data][type]", "string"));
@@ -174,26 +187,26 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
-			
+
 			List<StStaff> list = digestListReadRspJson(conn.sendStfReq(nvps), StStaff.class);
-			
+
 			if(list.size()==1){
 				return list.get(0);
 			}else if(list.size()>1){
 				throw new Exception("More than one staff share the same name");
 			}
-			
+
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	/*private StStaff schStfsById(String id) throws Exception{
 		logger.info("Search Staff by Id Start");
 		logger.info("id = " + id);
-		
+
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("filter[0][field]", "id"));
 		nvps.add(new BasicNameValuePair("filter[0][data][type]", "numeric"));
@@ -203,22 +216,22 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
-			
+
 			List<StStaff> list = digestListReadRspJson(conn.sendStfReq(nvps), StStaff.class);
-			
+
 			if(list.size()==1){
 				return list.get(0);
 			}else if(list.size()>1){
 				throw new Exception("More than one staff share the same id");
 			}
-			
+
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
 		return null;
 	}*/
-	
+
 	//Activity
 	private List<FacilityMap> schActFacById(String actId){
 		logger.info("Search Activities Facility by Id");
@@ -226,43 +239,43 @@ public class SchoolTracsAgent {
 		try {
 
 			return digestListReadRspJson(conn.sendActFacReq(actId), FacilityMap.class);
-			
+
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
-		
+
 		return null;
-		
+
 	}
-	
+
 	private List<StaffMap> schActStfById(String actId){
 		logger.info("Search Activities Staff by Id");
 		logger.info("actId = " + actId);
 		try {
 
 			return digestListReadRspJson(conn.sendActStfReq(actId), StaffMap.class);
-			
+
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
-		
+
 		return null;
-		
+
 	}
-	
+
 	private Activity schActById(String actId){
 		logger.info("Search Activities by Id");
 		logger.info("actId = " + actId);
-		
+
 		try {
 			return digestReadRspJson(conn.sendActReq(actId), Activity.class);			
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 
@@ -270,10 +283,11 @@ public class SchoolTracsAgent {
 	public List<Customer> schCustsByPhone(String phone){
 		logger.info("Search Customer by Phone Start");
 		logger.info("phone = " + phone);
-		
+
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("filter[0][field]", "phone"));
 		nvps.add(new BasicNameValuePair("filter[0][data][type]", "string"));
+		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
 		nvps.add(new BasicNameValuePair("filter[0][data][value]", phone));
 		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
 		nvps.add(new BasicNameValuePair("start", "0"));
@@ -284,15 +298,44 @@ public class SchoolTracsAgent {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
-		
+
 		return new ArrayList<Customer>();
 
 	}
-	
+
+	//customer
+	public List<Customer> schCustsByPhoneAndBarcode(String phone, String barcode){
+		logger.info("Search Customer by Phone and Barcode Start");
+		logger.info("phone = " + phone);
+		logger.info("barcode = " + barcode);
+
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("filter[0][field]", "phone"));
+		nvps.add(new BasicNameValuePair("filter[0][data][type]", "string"));
+		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
+		nvps.add(new BasicNameValuePair("filter[0][data][value]", phone));
+		nvps.add(new BasicNameValuePair("filter[1][field]", "barcode"));
+		nvps.add(new BasicNameValuePair("filter[1][data][type]", "string"));
+		nvps.add(new BasicNameValuePair("filter[1][data][comparison]", "eq"));
+		nvps.add(new BasicNameValuePair("filter[1][data][value]", barcode));
+		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("start", "0"));
+
+		try {
+			return digestListReadRspJson(conn.sendCustReq(nvps), Customer.class);
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+
+		return new ArrayList<Customer>();
+
+	}
+
 	public Customer schCustsById(String id) throws Exception{
 		logger.info("Search Customer by Id Start");
 		logger.info("id = " + id);
-		
+
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("filter[0][field]", "id"));
 		nvps.add(new BasicNameValuePair("filter[0][data][type]", "numeric"));
@@ -302,15 +345,15 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
-			
+
 			List<Customer> list = digestListReadRspJson(conn.sendCustReq(nvps), Customer.class);
-			
+
 			if(list.size()==1){
 				return list.get(0);
 			}else if(list.size()>1){
 				throw new Exception("More than one staff share the same id");
 			}
-			
+
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
@@ -328,7 +371,7 @@ public class SchoolTracsAgent {
 		}
 		return false;
 	}
-	
+
 	//teacher
 	private HashMap<Integer, WorkHour> getTchWkhr(String tchId){
 		logger.info("Get Teacher Working Hour");
@@ -346,107 +389,116 @@ public class SchoolTracsAgent {
 
 		return map;
 	}
-	
+
 	//service
 	public Boolean updateUserPwd(String custId, String oldPwd, String newPwd){
-		
-		Customer c;
+
+		Customer cust;
 		try {
-			c = this.schCustsById(custId);
+			cust = this.schCustsById(custId);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 			return false;
 		}
-				
-		if(!c.getBarCode().equals(oldPwd)){
+
+		if(!cust.getBarCode().equals(oldPwd)){
+			logger.info("Entered old pwd is not equal to DB");
 			return false;
 		}
+
+		//search if any customer using the same phone with the same password which the user want to update
+		List<Customer> custs = this.schCustsByPhoneAndBarcode(cust.getPhone(), newPwd);
 		
-		Customer cust = new Customer();
-		cust.setId(c.getId());
-		cust.setBarCode(newPwd);
-		
-		Boolean result = this.updateCustInfo(cust);
-		
+		for(Customer c:custs){
+			logger.info("Pwd collide with customer " + c.getName());
+			return false;
+		}
+
+		Customer dummy = new Customer();
+		dummy.setId(cust.getId());
+		dummy.setBarCode(newPwd);
+
+		Boolean result = this.updateCustInfo(dummy);
+
 		if(result){
 			Runnable msgTask = new Runnable(){
 
 				@Override
 				public void run() {
-					
-					wAgent.sendChgPwdMsg(c.getName(), c.getMobile());
-										
+
+					wAgent.sendChgPwdMsg(cust.getName(), cust.getMobile());
+
 				}
 			};
-			
+
 			Thread t = new Thread(msgTask);
 			t.start();
 		}
-		
+
 		return result;
 	}
-	
-	
+
+
 	public Boolean activate(String stdName, String phone, String mobile){
-		
+
 		List<Customer> custs = schCustsByPhone(phone);
-		
+
 		if(custs.isEmpty()){
 			logger.info("cannot find customer by phone");
 			return false;
 		}
-			
+
 		if(custs.size()>1){
 			logger.info("More than one customer is found");
 			return false;
 		}
-			
+
 		Customer cust = custs.get(0);
-		
+
 		if(!cust.getName().contains(stdName)){
 			logger.info("Customer name does not contain input name");
 			return false;
 		}
-		
+
 		if(StringUtils.isNotEmpty(cust.getBarCode())){
 			logger.info("service already opened");
 			return false;
 		}
-		
+
 		String pw = MasteryUtil.pwGen();
-		
+
 		Customer c = new Customer();
 		c.setId(cust.getId());
 		c.setMobile(cust.getMobile());
 		c.setBarCode(pw);
-		
+
 		Boolean result = this.updateCustInfo(c);
-		
+
 		if(result){
 			Runnable msgTask = new Runnable(){
 
 				@Override
 				public void run() {
-					
+
 					wAgent.sendActivateMsg(stdName, mobile, pw);
-										
+
 				}
 			};
-			
+
 			Thread t = new Thread(msgTask);
 			t.start();
 		}
-		
+
 		return result;
 	}
-	
+
 	//make up
 	public Boolean aplyNewMkup(String stdId, String frLsonId, Lesson toLson){
 		logger.info("Apply New Makeup class start");
 
 		try {
-	
+
 			String result = conn.sendNewMkupReq(toLson, stdId, false);
 			logger.debug(result);
 			if(result.contains("Exception")){
@@ -460,7 +512,7 @@ public class SchoolTracsAgent {
 			if(result.contains("Exception")){
 				return false;
 			}
-			
+
 			Runnable msgTask = new Runnable(){
 
 				@Override
@@ -468,10 +520,10 @@ public class SchoolTracsAgent {
 					sendWhatsappMsg(stdId, frLsonId, toLson);
 				}
 			};
-			
+
 			Thread t = new Thread(msgTask);
 			t.start();
-			
+
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
@@ -480,7 +532,7 @@ public class SchoolTracsAgent {
 
 		return true;
 	}
-	
+
 	public Boolean aplyExtMkup(String stdId, String stdLsonId, String frLsonId, Lesson toLson){
 		logger.info("Apply Existing Makeup class start");
 
@@ -492,7 +544,7 @@ public class SchoolTracsAgent {
 			if(result.contains("Exception")){
 				return false;
 			}
-			
+
 			Runnable msgTask = new Runnable(){
 
 				@Override
@@ -500,10 +552,10 @@ public class SchoolTracsAgent {
 					sendWhatsappMsg(stdId, frLsonId, toLson);
 				}
 			};
-			
+
 			Thread t = new Thread(msgTask);
 			t.start();
-			
+
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
@@ -512,21 +564,21 @@ public class SchoolTracsAgent {
 
 		return true;
 	}
-	
+
 	public List<Lesson> schMkup(Lesson src, String stdName){
 		logger.info("Search For Makeup Class Start");
-		
+
 		List<Lesson> rstLsons= new ArrayList<Lesson>();
-		
+
 		if(skipHash.containsKey(src.getTeacher().getId())){
 			return rstLsons;
 		}
-		
+
 		//room-date Hash
 		HashMap<String, List<Lesson>> rdLsonHash = new HashMap<String, List<Lesson>>();
-		
+
 		Date currentDateTime = new Date();
-		
+
 		Calendar todayCal = MasteryUtil.getPlainCal(currentDateTime);
 
 		Calendar stCal = MasteryUtil.getPlainCal(src.getStartDateTime());
@@ -547,12 +599,12 @@ public class SchoolTracsAgent {
 		edCal.add(Calendar.DAY_OF_MONTH, 6);
 
 		Date stDate = stCal.getTime();
-		
+
 		//prevent the lesson with start time early then current date time shown
 		if(stCal.equals(todayCal)){
 			stDate = currentDateTime;
 		}
-		
+
 		Date edDate = edCal.getTime();
 
 		Teacher t = src.getTeacher();
@@ -598,7 +650,7 @@ public class SchoolTracsAgent {
 
 			logger.debug("runCal=" + SchoolTracsConst.SDF_FULL.format(runCal.getTime()));
 			logger.debug("edCal=" + SchoolTracsConst.SDF_FULL.format(edCal.getTime()));
-			
+
 			while(runCal.before(edCal)||runCal.equals(edCal)){
 
 				List<FreeTimeslot> ftss = new ArrayList<FreeTimeslot>();
@@ -625,7 +677,7 @@ public class SchoolTracsAgent {
 								cal.add(Calendar.MINUTE, src.duration());
 
 								l.setEndDateTime(cal.getTime());
-								
+
 								try {
 									if(!isRmFull(l, rdLsonHash)){
 										rstLsons.add(l);
@@ -640,13 +692,13 @@ public class SchoolTracsAgent {
 						}
 					}
 				}
-				
+
 				runCal.add(Calendar.DAY_OF_MONTH, 1);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return rstLsons;
 	}
 
@@ -685,53 +737,53 @@ public class SchoolTracsAgent {
 	}
 
 	private Lesson getLsonById(String id){
-		
+
 		logger.info("Get Lesson by Id Start");
 		logger.info("id = " + id);
-		
+
 		Activity act = this.schActById(id);
-		
+
 		if(act==null){
 			logger.error("Cannot find from lesson with id=" +id);
 			return null;
 		}
-		
+
 		Lesson frLson;
-		
+
 		try {
 			frLson = new Lesson(act);
 		} catch (ParseException e) {
 			logger.error(e.getMessage());
 			return null;
 		}
-		
+
 		//assume only one staff will be found
 		List<StaffMap> stfs = this.schActStfById(act.getId());
-		
+
 		if(stfs.isEmpty() || stfs.size() > 1){
 			logger.error("More than one or no staff is found");
 			return null;
 		}
-		
+
 		StaffMap sMap = stfs.get(0);
-		
+
 		//assume only one facility will be found
 		List<FacilityMap> facs = this.schActFacById(act.getId());
-		
+
 		if(facs.isEmpty() || facs.size() > 1){
 			logger.error("More than one or no facilty is found");
 			return null;
 		}
-		
+
 		FacilityMap f = facs.get(0);
-		
+
 		frLson.setTeacher(new Teacher(sMap));
 		frLson.setRoom(new Room(f));
-		
+
 		return frLson;
-		
+
 	}
-	
+
 	private List<Lesson> schLson(String schStr, Date fromDate, Date toDate, String displayMode, SearchActivityRequest.ContentOpt opt) throws JsonParseException, JsonMappingException, ClientProtocolException, IOException{
 
 		SearchActivityResponse schRsp = jsonToSchRsp(conn.sendSchReq(schStr, fromDate, toDate, displayMode, opt)); 
@@ -763,12 +815,12 @@ public class SchoolTracsAgent {
 
 		return rstLsons;
 	}
-	
+
 	//room
 	private List<Room> getRms() throws JsonParseException, JsonMappingException, ClientProtocolException, IOException{
 		return jsonToRms(conn.sendFacReq());
 	}
-	
+
 	private Boolean isRmFull(Lesson l, HashMap<String, List<Lesson>> rdLsonHash) throws Exception{
 		if(rmHash.containsKey(l.getRoom().getId())){
 			Room r = rmHash.get(l.getRoom().getId());
@@ -800,18 +852,18 @@ public class SchoolTracsAgent {
 	//Whatsapp
 	private void sendWhatsappMsg(String stdId, String frLsonId, Lesson toLson){
 		logger.info("Send Whatsapp message start");
-		
+
 		logger.debug("student id=" + stdId);
 		logger.debug("frLson id=" + frLsonId);
 		logger.debug(toLson.toString());
-		
+
 		Lesson frLson = this.getLsonById(frLsonId);
-		
+
 		if(frLson == null){
 			logger.error("From Lesson cannot be found");
 			return;
 		}
-		
+
 		Customer c;
 		try {
 			c = this.schCustsById(stdId);
@@ -820,21 +872,21 @@ public class SchoolTracsAgent {
 			e.printStackTrace();
 			return;
 		}
-		
+
 		Staff s = this.getStfFromHash(frLson.getTeacher().getId(), frLson.getTeacher().getName());
-		
+
 		wAgent.sendMkupStdMsg(c, frLson, toLson);
-		
+
 		if(s!=null){
 			wAgent.sendMkupTchMsg(s, c.getName(), frLson, toLson);
 		}else{
 			logger.error("Cannot find teacher = " + s + " teacher whatsapp will not be send");
 		}
-		
+
 		for(Staff a: this.adminList){
-			
+
 			wAgent.sendMkupAdmMsg(a, c.getName(), frLson, toLson);
-			
+
 		}
 	}
 
@@ -865,7 +917,7 @@ public class SchoolTracsAgent {
 		return roomList;
 
 	}
-	
+
 	private static <T> T digestReadRspJson(String json, Class<T> c){
 		ObjectMapper mapper = new ObjectMapper();
 		JavaType type = mapper.getTypeFactory().constructParametricType(ReadResponse.class, c);
@@ -878,10 +930,10 @@ public class SchoolTracsAgent {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	
+
 	private static <T> List<T> digestListReadRspJson(String json, Class<T> c){
 		ObjectMapper mapper = new ObjectMapper();
 		JavaType type = mapper.getTypeFactory().constructParametricType(ListReadResponse.class, c);
@@ -894,14 +946,14 @@ public class SchoolTracsAgent {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return new ArrayList<T>();
 	}
-	
+
 	private static List<StaffWorkHour> jsonToStfWkHrs(String json) throws JsonParseException, JsonMappingException, IOException{
 
 		logger.info("Json="+json);
-	
+
 		ObjectMapper mapper = new ObjectMapper();
 		CollectionType type = mapper.getTypeFactory().constructCollectionType(List.class, StaffWorkHour.class);
 		SimpleModule module = new SimpleModule();
@@ -913,9 +965,9 @@ public class SchoolTracsAgent {
 	}
 
 	private Boolean processCustUpdRsp(String json){
-		
+
 		Boolean result = false;
-		
+
 		try {
 			JsonFactory factory = new JsonFactory();
 			JsonParser parser  = factory.createParser(json);
@@ -936,7 +988,7 @@ public class SchoolTracsAgent {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
-		
+
 		return result;
 	}
 
@@ -978,44 +1030,6 @@ public class SchoolTracsAgent {
 		}
 
 		return "";
-	}
-	
-	public static void main(String[] args) throws IOException{
-		SchoolTracsAgent agent = new SchoolTracsAgent();
-		agent.uname = "travisli@masteryoim";
-		agent.pwd = "24643466";
-		agent.init();
-		/*Calendar stCal = MasteryUtil.getPlainCal(new Date());
-		Calendar edCal = MasteryUtil.getPlainCal(new Date());
-		edCal.add(Calendar.DAY_OF_MONTH, 7);
-		//List<Lesson> list = agent.schLsonByStd("K2李頌圻", stCal.getTime(), edCal.getTime());
-		//logger.info(list.toString());
-		List<Customer> list = agent.schCustsByPhone("96841163");
-
-
-		logger.info(list.toString());*/
-
-		/*HashMap<Integer, WorkHour> map = agent.getTchWkhr("10");
-
-		for(WorkHour w: map.values()){
-			logger.info(w.toString());
-		}*/
-
-		/*if(list.size()>0){
-			Lesson l = list.get(0);
-			Calendar start = Calendar.getInstance();
-			Calendar end = Calendar.getInstance();
-			start.setTime(l.getStartDateTime());
-			end.setTime(l.getEndDateTime());
-
-			start.add(Calendar.HOUR, 2);
-			end.add(Calendar.HOUR, 2);
-			l.setStartDateTime(start.getTime());
-			l.setEndDateTime(end.getTime());
-			Boolean result = agent.aplyMkup(l, "813");
-			logger.info(result.toString());
-		}*/
-
 	}
 
 }
