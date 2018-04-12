@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -65,7 +63,7 @@ public class SchoolTracsAgent {
 
 	private HashMap<String, Staff> stfHash = new HashMap<String, Staff>();
 
-	private List<Staff> adminList = new ArrayList<Staff>();
+	private HashMap<String, Staff> adminHash = new HashMap<String, Staff>();
 
 	private HashMap<String, Staff> skipHash = new HashMap<String, Staff>();
 
@@ -84,38 +82,37 @@ public class SchoolTracsAgent {
 	@Value("${schooltracs.mkup.sch.limit}")
 	private Integer mkupSchLimit;
 
-	@PostConstruct
-	public void init() throws IOException{
-
-		List<Room> rms = this.getRms();
-		for(Room r:rms){
-			if(rmHash.containsKey(r.getId())){
-				rmHash.replace(r.getId(), r);
-			}else{
-				rmHash.put(r.getId(), r);
-			}
-		}
-
-		stfHash = this.getStaffs();
+	//reload the staff and rm map for every 30 mins
+	@Scheduled(fixedDelay = 180000)
+	public void init(){
+		this.loadRmHash();
+		this.loadStfHash();
 	}
 
-	//reload the staff and rm map for every 30 mins
-	@Scheduled(fixedRate = 180000)
-	public void reload(){
-		logger.info("Scheduled reload start");
+	private void loadRmHash(){
+		logger.info("Get All SchoolTracs Rooms");
+
 		try {
-			init();
+			List<Room> rms = this.getRms();
+
+			for(Room r:rms){
+				if(rmHash.containsKey(r.getId())){
+					rmHash.replace(r.getId(), r);
+				}else{
+					rmHash.put(r.getId(), r);
+				}
+			}
+
 		} catch (IOException e) {
-			logger.error("reload fail");
+			logger.error("Load romm hash error");
+			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
+
 	}
 
-	//staff
-	public HashMap<String, Staff> getStaffs(){
+	private void loadStfHash(){
 		logger.info("Get All SchoolTracs Staffs");
-
-		HashMap<String, Staff> hash = new HashMap<String, Staff>();
 
 		try {
 
@@ -123,35 +120,47 @@ public class SchoolTracsAgent {
 
 			for(StStaff s: list){
 				if(!s.getDeleted()){
+
 					Staff stf = new Staff(s);
 
 					if(stf.getConfig().getAdminWapp()){
-						logger.info(stf.getName()+" is added to admin list");
-						this.adminList.add(stf);
+						if(adminHash.containsKey(stf.getId())){
+							logger.info(stf.getName()+" is replaced in admin hash");
+							adminHash.replace(stf.getId(), stf);
+						}else{
+							logger.info(stf.getName()+" is added to admin hash");
+							adminHash.put(stf.getId(),stf);
+						}
 					}
 
 					if(stf.getConfig().getMkupSchSkip()){
-						logger.info(stf.getName()+" is added to skip list");
-						this.skipHash.put(stf.getId(), stf);
+						if(skipHash.containsKey(stf.getId())){
+							logger.info(stf.getName()+" is replaced in skip hash");
+							skipHash.replace(stf.getId(), stf);
+						}else{
+							logger.info(stf.getName()+" is added to skip hash");
+							skipHash.put(stf.getId(),stf);
+						}
 					}
 
 					logger.debug(stf.toString());
-					if(hash.containsKey(s.getId())){
-						hash.replace(s.getId(), stf);
+					if(stfHash.containsKey(stf.getId())){
+						logger.info(stf.getName()+" is replaced in staff hash");
+						stfHash.replace(stf.getId(), stf);
 					}else{
-						hash.put(s.getId(), stf);
+						logger.info(stf.getName()+" is added to staff hash");
+						stfHash.put(stf.getId(), stf);
 					}
 				}	
 			}		
 
 		} catch (IOException e) {
+			logger.error("Load staff hash error");
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
-
-		return stfHash;
-
 	}
+
 
 	private Staff getStfFromHash(String stfId, String stfName){
 		if(stfHash.containsKey(stfId)){
@@ -302,7 +311,7 @@ public class SchoolTracsAgent {
 		return new ArrayList<Customer>();
 
 	}
-	
+
 	public List<Customer> schCustsByPhoneAndName(String phone, String name){
 		logger.info("Search Customer by Phone and Name Start");
 		logger.info("phone = " + phone);
@@ -436,7 +445,7 @@ public class SchoolTracsAgent {
 
 		//search if any customer using the same phone with the same password which the user want to update
 		List<Customer> custs = this.schCustsByPhoneAndBarcode(cust.getPhone(), newPwd);
-		
+
 		for(Customer c:custs){
 			logger.info("Pwd collide with customer " + c.getName());
 			return false;
@@ -906,11 +915,11 @@ public class SchoolTracsAgent {
 			logger.error("Cannot find teacher = " + s + " teacher whatsapp will not be send");
 		}
 
-		for(Staff a: this.adminList){
+		this.adminHash.forEach((k,v)->{
 
-			wAgent.sendMkupAdmMsg(a, c.getName(), frLson, toLson);
+			wAgent.sendMkupAdmMsg(v, c.getName(), frLson, toLson);
 
-		}
+		});
 	}
 
 	//aux
