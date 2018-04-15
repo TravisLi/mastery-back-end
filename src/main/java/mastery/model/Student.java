@@ -1,5 +1,6 @@
 package mastery.model;
 
+import mastery.schooltracs.model.Customer;
 import mastery.schooltracs.model.CustomerMap;
 import mastery.schooltracs.util.SchoolTracsConst;
 import mastery.schooltracs.util.SchoolTracsUtil;
@@ -16,6 +17,14 @@ public class Student {
 	
 	public Student() {
 		super();
+	}
+	
+	public Student(Customer c) {
+		super();
+		this.id = c.getId();
+		this.name = c.getName();
+		this.lvl = SchoolTracsUtil.classifyLevel(c.getLevel());
+		this.paid = false;
 	}
 	
 	public Student(String id, String name, Level lvl, Boolean paid) {

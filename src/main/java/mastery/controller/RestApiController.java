@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import mastery.model.Auth;
 import mastery.model.Lesson;
+import mastery.model.Student;
 import mastery.model.User;
 import mastery.schooltracs.core.SchoolTracsAgent;
 import mastery.schooltracs.model.Customer;
@@ -80,6 +81,13 @@ public class RestApiController {
 		
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public ResponseEntity<User> login(@RequestBody Auth auth){
+		return this.studentLogin(auth);
+	}
+	
+	@RequestMapping(value = "/student/login", method = RequestMethod.POST)
+	public ResponseEntity<User> studentLogin(@RequestBody Auth auth){
+		
+		logger.info("Student login start");
 		
 		if(StringUtils.isEmpty(auth.getUsername())||StringUtils.isEmpty(auth.getPwd())){
 			return null;
@@ -104,8 +112,54 @@ public class RestApiController {
 		
 		for(Customer c: custs){
 			if(auth.getPwd().equals(c.getBarCode())){
-				return new ResponseEntity<User>(new User(c, "student"), HttpStatus.OK);
+				return new ResponseEntity<User>(new User(c), HttpStatus.OK);
 			}
+		}
+		
+		return null;
+		
+	}
+	
+	@RequestMapping(value = "/parent/login", method = RequestMethod.POST)
+	public ResponseEntity<User> parentLogin(@RequestBody Auth auth){
+		
+		logger.info("Parent login start");
+		
+		if(StringUtils.isEmpty(auth.getUsername())||StringUtils.isEmpty(auth.getPwd())){
+			return null;
+		}
+		
+		if(!auth.getUsername().matches(PHONE_REGEX)){
+			logger.error("Phone No is not in correct format");
+			return null;
+		}
+		
+		
+		List<Customer> custs = sAgent.schCustsByContact1Phone(auth.getUsername());
+		
+		if(custs.isEmpty()){
+			return null;
+		}
+		
+		boolean matchPwd = false;
+		String name = "";
+		
+		List<Student> stdList = new ArrayList<Student>();
+		
+		for(Customer c:custs){
+
+			if(auth.getPwd().equals(c.getBarCode())){
+				logger.info("Password match");
+				matchPwd = true;
+				name = c.getName() + "家長";
+			}
+			
+			stdList.add(new Student(c));
+			
+		}
+		
+		if(matchPwd){
+			return new ResponseEntity<User>(new User(name, auth.getUsername(), stdList), HttpStatus.OK);
 		}
 		
 		return null;
@@ -132,11 +186,38 @@ public class RestApiController {
 		
 	}
 	
+	@RequestMapping(value = "/lesson/parent/{phone}/{weekNo}", method = RequestMethod.GET)
+	public ResponseEntity<List<Lesson>> getLsonsForParent(@PathVariable("phone")String phone, @PathVariable("weekNo")Integer weekNo){
+		logger.info("Get Lesson for Parent Start");
+		logger.info("phone="+phone+" weekNo="+weekNo);
+		
+		List<Customer> custs = sAgent.schCustsByContact1Phone(phone);
+		
+		List<Lesson> list = new ArrayList<Lesson>();
+		
+		for(Customer c: custs){
+			for(Lesson l: this.schStdLsons(c.getName(), weekNo)){
+				//intent to set the student for identification in front end
+				l.setStudent(new Student(c));
+				list.add(l);	
+			}	
+		}
+		
+		Collections.sort(list);
+		
+		return new ResponseEntity<List<Lesson>>(list, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/lesson/student/{name}/{weekNo}", method = RequestMethod.GET)
 	public ResponseEntity<List<Lesson>> getStdLsons(@PathVariable("name")String name, @PathVariable("weekNo")Integer weekNo){
 		logger.info("Get Student Lesson Start");
 		logger.info("name="+name+" weekNo="+weekNo);
-		
+				
+		return new ResponseEntity<List<Lesson>>(schStdLsons(name,weekNo), HttpStatus.OK);
+	}
+	
+	private List<Lesson> schStdLsons(String name, Integer weekNo){
+				
 		Calendar stCal = Calendar.getInstance();
 		//if current week, the lesson before now should not be shown
 		if(weekNo>0){
@@ -160,8 +241,7 @@ public class RestApiController {
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
-		
-		return new ResponseEntity<List<Lesson>>(list, HttpStatus.OK);
+		return list;
 	}
 	
 	@RequestMapping(value = "/mkup/find/{stdName}", method = RequestMethod.POST)

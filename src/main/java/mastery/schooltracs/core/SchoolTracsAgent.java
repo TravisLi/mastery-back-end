@@ -367,6 +367,29 @@ public class SchoolTracsAgent {
 		return new ArrayList<Customer>();
 
 	}
+	
+	public List<Customer> schCustsByContact1Phone(String phone){
+		logger.info("Search Customer by Contact1Phone Start");
+		logger.info("phone = " + phone);
+
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("filter[0][field]", "contact1Phone"));
+		nvps.add(new BasicNameValuePair("filter[0][data][type]", "string"));
+		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
+		nvps.add(new BasicNameValuePair("filter[0][data][value]", phone));
+		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("start", "0"));
+
+		try {
+			return digestListReadRspJson(conn.sendCustReq(nvps), Customer.class);
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+
+		return new ArrayList<Customer>();
+
+	}
 
 	public Customer schCustsById(String id) throws Exception{
 		logger.info("Search Customer by Id Start");
