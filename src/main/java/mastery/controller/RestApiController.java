@@ -78,7 +78,8 @@ public class RestApiController {
 	public ResponseEntity<Boolean> check() {
 		return new ResponseEntity<Boolean>(true, HttpStatus.OK);
 	}
-		
+	
+	@Deprecated
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public ResponseEntity<User> login(@RequestBody Auth auth){
 		return this.studentLogin(auth);
