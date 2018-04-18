@@ -26,6 +26,8 @@ public class Lesson implements Comparable<Lesson>  {
 	private String category;
 	private Room room;
 	private Teacher teacher;
+	//from identify the lesson is search from which student
+	private Student student;
 	private List<Student> students = new ArrayList<Student>();
 	
 	public Lesson() {
@@ -146,6 +148,14 @@ public class Lesson implements Comparable<Lesson>  {
 
 	public void setTeacher(Teacher teacher) {
 		this.teacher = teacher;
+	}
+
+	public Student getStudent() {
+		return student;
+	}
+
+	public void setStudent(Student student) {
+		this.student = student;
 	}
 
 	public List<Student> getStudents() {
