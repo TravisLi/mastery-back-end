@@ -2,6 +2,8 @@ package mastery.schooltracs.model;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /*{"6 ":
  * ["Activity.searchActivities",
  * "2",
@@ -17,6 +19,7 @@ import java.util.Date;
  * {}]}
  * */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchActivityRequest {
 
 	private Integer reqSeq;

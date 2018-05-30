@@ -2,9 +2,12 @@ package mastery.schooltracs.model;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import mastery.model.Lesson;
 import mastery.schooltracs.util.SchoolTracsConst;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NewMakeupRequest {
 
 	/*{

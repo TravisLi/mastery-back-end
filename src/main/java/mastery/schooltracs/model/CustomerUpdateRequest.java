@@ -1,7 +1,10 @@
 package mastery.schooltracs.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import mastery.schooltracs.util.SchoolTracsConst;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomerUpdateRequest {
 
 	private String centreId;
