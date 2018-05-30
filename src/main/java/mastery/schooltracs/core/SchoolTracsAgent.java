@@ -73,12 +73,6 @@ public class SchoolTracsAgent {
 	@Autowired
 	private WhatsappRestAgent wAgent;
 
-	@Value("${schooltracs.sys.uname}")
-	private String uname;
-
-	@Value("${schooltracs.sys.pwd}")
-	private String pwd;
-
 	@Value("${schooltracs.mkup.sch.limit}")
 	private Integer mkupSchLimit;
 
@@ -87,6 +81,15 @@ public class SchoolTracsAgent {
 	public void init(){
 		this.loadRmHash();
 		this.loadStfHash();
+	}
+	
+	@Scheduled(cron = "0 0 9,12,15,18,21 * * *")
+	public void healthCheck(){
+		this.adminHash.forEach((k,v)->{
+
+			wAgent.sendMsg(v.getMobile(), "daily test from backend");
+
+		});
 	}
 
 	private void loadRmHash(){

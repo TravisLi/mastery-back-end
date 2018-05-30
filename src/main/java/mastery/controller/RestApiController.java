@@ -44,7 +44,7 @@ public class RestApiController {
 	private static final String PHONE_REGEX = "^[0-9]{8}";
 	
 	@Autowired 
-	WhatsappRestAgent wAgent;
+	private WhatsappRestAgent wAgent;
 	
 	@Autowired
 	private SchoolTracsAgent sAgent;
