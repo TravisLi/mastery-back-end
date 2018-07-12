@@ -20,8 +20,8 @@ public class User {
 		this.role = "student";
 	}
 	
-	public User(String name, String contact, List<Student> list){
-		this.id = "0";
+	public User(String custId, String name, String contact, List<Student> list){
+		this.id = custId;
 		this.name = name;
 		this.contact = contact;
 		this.role = "parent";

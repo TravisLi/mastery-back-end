@@ -144,6 +144,7 @@ public class RestApiController {
 		
 		boolean matchPwd = false;
 		String name = "";
+		String custId = ""; 
 		
 		List<Student> stdList = new ArrayList<Student>();
 		
@@ -153,6 +154,7 @@ public class RestApiController {
 				logger.info("Password match");
 				matchPwd = true;
 				name = c.getName() + "家長";
+				custId = c.getId();
 			}
 			
 			stdList.add(new Student(c));
@@ -160,7 +162,7 @@ public class RestApiController {
 		}
 		
 		if(matchPwd){
-			return new ResponseEntity<User>(new User(name, auth.getUsername(), stdList), HttpStatus.OK);
+			return new ResponseEntity<User>(new User(custId, name, auth.getUsername(), stdList), HttpStatus.OK);
 		}
 		
 		return null;
