@@ -528,7 +528,7 @@ public class SchoolTracsAgent {
 
 		Customer c = new Customer();
 		c.setId(cust.getId());
-		c.setMobile(cust.getMobile());
+		c.setMobile(mobile);
 		c.setBarCode(pw);
 
 		Boolean result = this.updateCustInfo(c);
