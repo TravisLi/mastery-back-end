@@ -1,16 +1,16 @@
 package mastery.model;
 
+import mastery.schooltracs.model.Activity;
+import mastery.schooltracs.util.SchoolTracsConst;
+import mastery.schooltracs.util.SchoolTracsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import mastery.schooltracs.model.Activity;
-import mastery.schooltracs.util.SchoolTracsConst;
-import mastery.schooltracs.util.SchoolTracsUtil;
 
 public class Lesson implements Comparable<Lesson>  {
 	
@@ -69,8 +69,8 @@ public class Lesson implements Comparable<Lesson>  {
 		this.startDateTime = SchoolTracsConst.SDF_FULL.parse(startDateStr);
 		this.endDateTime = SchoolTracsConst.SDF_FULL.parse(endDateStr);
 	}
-	
-	public String getId() {
+
+    public String getId() {
 		return id;
 	}
 
@@ -190,4 +190,7 @@ public class Lesson implements Comparable<Lesson>  {
 		return 0;
 	}
 
+	public static boolean hasStudents(Lesson x) {
+		return x != null && !CollectionUtils.isEmpty(x.getStudents());
+	}
 }

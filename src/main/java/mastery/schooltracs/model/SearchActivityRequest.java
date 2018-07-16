@@ -1,8 +1,8 @@
 package mastery.schooltracs.model;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.Date;
 
 /*{"6 ":
  * ["Activity.searchActivities",
@@ -43,7 +43,7 @@ public class SearchActivityRequest {
 		contentOpt = new ContentOpt();
 		//unknownStr2 = "";
 		unknownInt1 = 4;
-		unknownInt2 = 50;
+		unknownInt2 = 10000;	// possible is maximum number of record to scan
 		unknownStr3 = "2";
 		unknownObj = new Object();
 		
