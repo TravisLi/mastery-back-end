@@ -13,7 +13,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,18 +24,16 @@ import static org.hamcrest.Matchers.is;
 @SpringBootApplication(scanBasePackages={"mastery"})
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class LessonNotificationService {
-    private static final Logger log = LoggerFactory.getLogger(LessonNotificationService.class);
+public class LessonNotificationServiceTest {
+    private static final Logger log = LoggerFactory.getLogger(LessonNotificationServiceTest.class);
 
     @Autowired
     private SchoolTracsAgent schoolTracsAgent;
 
     @Test
     public void searchAllLessonWithStudentsOnSameDate() throws Exception {
-        Date today = new Date();
-        Calendar tomorrow = MasteryUtil.getPlainCal(today);
-        tomorrow.add(Calendar.DATE, 1);
-        List<Lesson> searchResults = schoolTracsAgent.schLsonByStd("", MasteryUtil.getPlainCal(today).getTime(), tomorrow.getTime());
+        Date today = MasteryUtil.getPlainCal(new Date()).getTime();
+        List<Lesson> searchResults = schoolTracsAgent.schLsonByStd("", today, today);
         log.info("search result return lessons: {}", searchResults.size());
         assertThat(searchResults.size(), greaterThan(0));
 

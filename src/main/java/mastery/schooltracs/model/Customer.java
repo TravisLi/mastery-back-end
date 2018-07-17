@@ -1,6 +1,7 @@
 package mastery.schooltracs.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Customer {
@@ -258,5 +259,46 @@ public class Customer {
 	public void setMergeId(String mergeId) {
 		this.mergeId = mergeId;
 	}
-	
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+				.append("id", id)
+				.append("name", name)
+				.append("customerTypeId", customerTypeId)
+				.append("number", number)
+				.append("fullName", fullName)
+				.append("localName", localName)
+				.append("billName", billName)
+				.append("gender", gender)
+				.append("email", email)
+				.append("phone", phone)
+				.append("mobile", mobile)
+				.append("contact1Name", contact1Name)
+				.append("contact1Phone", contact1Phone)
+				.append("contact1Email", contact1Email)
+				.append("contact2Name", contact2Name)
+				.append("contact2Phone", contact2Phone)
+				.append("contact2Email", contact2Email)
+				.append("address", address)
+				.append("district", district)
+				.append("birthday", birthday)
+				.append("education", education)
+				.append("level", level)
+				.append("barCode", barCode)
+				.append("optIn", optIn)
+				.append("libraryQuota", libraryQuota)
+				.append("enrollDate", enrollDate)
+				.append("quitDate", quitDate)
+				.append("mergeWithId", mergeWithId)
+				.append("centerId", centerId)
+				.append("detail", detail)
+				.append("remark", remark)
+				.append("created", created)
+				.append("updated", updated)
+				.append("deleted", deleted)
+				.append("oid", oid)
+				.append("mergeId", mergeId)
+				.toString();
+	}
 }
