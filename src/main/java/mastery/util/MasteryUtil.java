@@ -1,13 +1,13 @@
 package mastery.util;
 
+import mastery.model.Lesson;
+import mastery.schooltracs.util.SchoolTracsConst;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
-
-import mastery.model.Lesson;
-import mastery.schooltracs.util.SchoolTracsConst;
 
 public class MasteryUtil {
 
@@ -35,7 +35,7 @@ public class MasteryUtil {
 	}
 	
 	public static String getFormattedLsonTime(Lesson l){
-		String s = SchoolTracsConst.SDF_DATE.format(l.getStartDateTime()) + "\n";
+		String s = SchoolTracsConst.SDF_DATE.format(l.getStartDateTime()) + " ";
 		s+= SchoolTracsConst.SDF_TIME.format(l.getStartDateTime()) + "-";
 		s+= SchoolTracsConst.SDF_TIME.format(l.getEndDateTime());
 		return s;

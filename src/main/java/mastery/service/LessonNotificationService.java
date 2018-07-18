@@ -5,17 +5,20 @@ import mastery.schooltracs.core.SchoolTracsAgent;
 import mastery.schooltracs.model.Customer;
 import mastery.util.MasteryUtil;
 import mastery.whatsapp.WhatsappRestAgent;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class LessonNotificationService {
@@ -34,7 +37,7 @@ public class LessonNotificationService {
         this.enabledString = enabledString;
     }
 
-    public void sendLessonNotificationOnDate(Date date) throws IOException {
+    public void sendLessonNotificationOnDate(Date date) {
         log.info("Start sending lesson notification on {}", date);
 
         List<Lesson> lessonWithStudents = allLessonOnDateHasStudents(date);
@@ -42,13 +45,15 @@ public class LessonNotificationService {
         log.info("total lessons with student(s): {}", lessonWithStudents.size());
 
         lessonWithStudents.forEach(this::sendNotificationMessageIfCustomerEnabled);
-
     }
 
     private void sendNotificationMessageIfCustomerEnabled(Lesson lesson) {
         try {
-            Customer student = schoolTracsAgent.schCustsById(lesson.getStudents().get(0).getId());
-
+            Customer customer = schoolTracsAgent.schCustsById(lesson.getStudents().get(0).getId());
+            if (StringUtils.containsIgnoreCase(customer.getRemark(), enabledString)) {
+                log.debug("Send lesson notification to {}, lesson: {}", customer.getMobile(), lesson);
+                whatsappAgent.sendLessonNotificationMsg(customer, lesson);
+            }
         } catch (Exception e) {
             log.warn("Cannot send notification for lesson: {}", lesson);
         }
@@ -63,6 +68,6 @@ public class LessonNotificationService {
         } catch (IOException e) {
             log.warn("Cannot search lesson", e);
         }
-        return Collections.EMPTY_LIST;
+        return new ArrayList<>();
     }
 }

@@ -1,5 +1,9 @@
 package mastery.whatsapp;
 
+import mastery.model.Lesson;
+import mastery.model.Staff;
+import mastery.schooltracs.model.Customer;
+
 import org.apache.catalina.util.URLEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,10 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import mastery.model.Lesson;
-import mastery.model.Staff;
-import mastery.schooltracs.model.Customer;
 
 @Service
 public class WhatsappRestAgent {
@@ -27,6 +27,7 @@ public class WhatsappRestAgent {
 	private static final String SEND_FAIL_MSG = "Send %s fail!";
 	private static final String ACTIVIATE_MSG = "activiation msg";
 	private static final String CHG_PWD_MSG = "change pwd msg";
+	private static final String LESSON_NOTIFICATION_MSG = "lesson notification msg";
 	private static final String MAKEUP_MSG_ADM = "makeup msg to admin";
 	private static final String MAKEUP_MSG_STD = "makeup msg to student";
 	private static final String MAKEUP_MSG_TCH = "makeup msg to teacher";
@@ -92,6 +93,10 @@ public class WhatsappRestAgent {
 	public void sendChgPwdMsg(String stdName, String mobile){
 		
 		this.sendMsg(mobile, WhatsappMsg.buildChgPwdMsg(stdName), CHG_PWD_MSG);
+	}
+
+	public void sendLessonNotificationMsg(Customer customer, Lesson lesson) {
+		this.sendMsg(customer.getMobile(), WhatsappMsg.buildLessonNotificationMsg(customer, lesson), LESSON_NOTIFICATION_MSG);
 	}
 	
 	public void sendMsg(String phoneNo, String msg, String logMsg){

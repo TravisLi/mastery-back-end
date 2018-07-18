@@ -12,6 +12,7 @@ public class WhatsappMsg {
 	public static final String MKUP_MSG_TMP_TCH = "致%s老師\r\n你的學生%s將課堂:\r\n%s\r\n%s\r\n%s\r\n轉至\n%s\r\n%s\r\n%s\r\n敬請留意!";
 	public static final String ACTIVIATE_MSG_TMP = "致%s同學\r\n歡迎使用碩士教室(愛民)課堂系統!\r\n你的賬戶現已啟用，登入密碼為%s。";
 	public static final String CHG_PWD_MSG_TMP = "致%s同學\r\n你的登入密碼已成功更新。";
+	public static final String LESSON_NOTIFICATION_MSG_TMP = "碩士教室(愛民)上課提示\r\n同學:%s\r\n課堂:%s\r\n時間:%s\r\n敬請留意";
 
 	public static String buildMkupTchMsg(Staff s, String stdName, Lesson frLson, Lesson toLson){
 
@@ -38,6 +39,11 @@ public class WhatsappMsg {
 
 		return buildMkupStdMsg(c.getName(), frLson.getName(), toLson.getName(), frLson.getRoom().getName(), toLson.getRoom().getName(), frLson.getTeacher().getName(), toLson.getTeacher().getName(), frLsonDt, toLsonDt);
 
+	}
+
+	public static String buildLessonNotificationMsg(Customer customer, Lesson lesson) {
+		String time = MasteryUtil.getFormattedLsonTime(lesson);
+		return buildLessonNotificationMsg(customer.getName(), lesson.getName(), time);
 	}
 
 	public static String buildOpenSrvMsg(String stdName, String pw){
@@ -98,4 +104,7 @@ public class WhatsappMsg {
 		return String.format(MKUP_MSG_TMP_TCH, tchName, stdName, frLsonName, frLsonRm, frLsonDt, toLsonName, toLsonRm, toLsonDt);
 	}
 
+	private static String buildLessonNotificationMsg(String studentName, String lessonName, String time) {
+		return String.format(LESSON_NOTIFICATION_MSG_TMP, studentName, lessonName, time);
+	}
 }
