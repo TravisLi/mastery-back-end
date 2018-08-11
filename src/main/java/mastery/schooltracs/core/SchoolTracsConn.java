@@ -1,13 +1,16 @@
 package mastery.schooltracs.core;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import mastery.model.Lesson;
+import mastery.schooltracs.json.serializer.ExistMakeupRequestSerializer;
+import mastery.schooltracs.json.serializer.NewMakeupRequestSerializer;
+import mastery.schooltracs.json.serializer.SearchRequestSerializer;
+import mastery.schooltracs.json.serializer.StaffWorkHourRequestSerializer;
+import mastery.schooltracs.model.*;
+import mastery.schooltracs.util.SchoolTracsConst;
+import mastery.schooltracs.util.SchoolTracsUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpHeaders;
@@ -29,23 +32,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-
-import mastery.model.Lesson;
-import mastery.schooltracs.json.serializer.ExistMakeupRequestSerializer;
-import mastery.schooltracs.json.serializer.NewMakeupRequestSerializer;
-import mastery.schooltracs.json.serializer.SearchRequestSerializer;
-import mastery.schooltracs.json.serializer.StaffWorkHourRequestSerializer;
-import mastery.schooltracs.model.Customer;
-import mastery.schooltracs.model.CustomerUpdateRequest;
-import mastery.schooltracs.model.ExistMakeupRequest;
-import mastery.schooltracs.model.NewMakeupRequest;
-import mastery.schooltracs.model.SearchActivityRequest;
-import mastery.schooltracs.model.StaffWorkHourRequest;
-import mastery.schooltracs.util.SchoolTracsConst;
-import mastery.schooltracs.util.SchoolTracsUtil;
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class SchoolTracsConn {
@@ -58,10 +50,10 @@ public class SchoolTracsConn {
 
 	private HttpClient httpClient;
 
-	@Value("${schooltracs.sys.uname}")
+	@Value("${schooltracs_sys_uname}")
 	private String uname;
 
-	@Value("${schooltracs.sys.pwd}")
+	@Value("${schooltracs_sys_pwd}")
 	private String pwd;
 	
 	private ActionObserver obsver = new ActionObserver();
@@ -294,6 +286,7 @@ public class SchoolTracsConn {
 		post.setHeader(HttpHeaders.USER_AGENT, SchoolTracsConst.USER_AGENT);
 		post.setHeader(HttpHeaders.ACCEPT_ENCODING, SchoolTracsConst.ACCEPT_ENCODING);
 		post.setHeader(HttpHeaders.CONNECTION, SchoolTracsConst.CONNECTION);
+		post.setHeader("X-Requested-With", "XMLHttpRequest");
 		return post;
 	}
 
