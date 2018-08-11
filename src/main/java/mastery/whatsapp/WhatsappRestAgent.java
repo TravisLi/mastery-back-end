@@ -19,7 +19,7 @@ public class WhatsappRestAgent {
 	private static final Logger logger = LoggerFactory.getLogger(WhatsappWebAgent.class);
 	private static final String MOBILE_REGEX = "^[965][0-9]{7}";
 
-	@Value("${whatsapp.server}")
+	@Value("${whatsapp_server}")
 	private String whatsappServer = "";
 	private static final String SEND_REST_API = "http://%s/sendto/%s/?message=%s";
 	private static final String SENDING_MSG = "Sending %s...";
