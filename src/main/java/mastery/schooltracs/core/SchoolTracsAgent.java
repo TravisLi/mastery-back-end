@@ -302,6 +302,7 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
 		nvps.add(new BasicNameValuePair("filter[0][data][value]", phone));
 		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
@@ -329,6 +330,7 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("filter[1][data][type]", "string"));
 		nvps.add(new BasicNameValuePair("filter[1][data][value]", name));
 		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
@@ -358,6 +360,7 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("filter[1][data][comparison]", "eq"));
 		nvps.add(new BasicNameValuePair("filter[1][data][value]", barcode));
 		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
@@ -381,6 +384,7 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
 		nvps.add(new BasicNameValuePair("filter[0][data][value]", phone));
 		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
