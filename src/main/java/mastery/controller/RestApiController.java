@@ -190,19 +190,28 @@ public class RestApiController {
 		
 	}
 	
-	@RequestMapping(value = "/journal/parent/{phone}/{startPos}", method = RequestMethod.GET)
-	public ResponseEntity<Journal> getJournalForParent(@PathVariable("phone")String phone, @PathVariable("startPos")Integer startPos){
+	/*@RequestMapping(value = "/journal/parent/{stdIds}/{index}", method = RequestMethod.GET)
+	public ResponseEntity<Journal> getJournalForParent(@PathVariable("phone")String phone, @PathVariable("index")Integer index){
 		logger.info("Get Journal for Parent");
-				
+		
 		return new ResponseEntity<Journal>(new Journal(), HttpStatus.OK);
 		
-	}
+	}*/
 	
-	@RequestMapping(value = "/journal/student/{stdIds}/{startPos}", method = RequestMethod.GET)
-	public ResponseEntity<Journal> getJournalForStd(@PathVariable("stdIds")String stdIds, @PathVariable("startPos")Integer startPos){
+	@RequestMapping(value = "/journal/{stdId}/{index}", method = RequestMethod.GET)
+	public ResponseEntity<List<Journal>> getJournalForStd(@PathVariable("stdId")String stdId, @PathVariable("index")Integer index){
 		logger.info("Get Journal for Students");
-				
-		return new ResponseEntity<Journal>(new Journal(), HttpStatus.OK);
+		
+		List<Journal> list = new ArrayList<Journal>();
+		
+		try {
+			list = sAgent.getJournalByStdId(stdId, index);
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<List<Journal>>(list, HttpStatus.OK);
 		
 	}
 	

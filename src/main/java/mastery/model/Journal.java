@@ -2,10 +2,13 @@ package mastery.model;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class Journal {
 
 	private String id;
 	private String content;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date created;
 	private String staffName;
 	private String staffId;

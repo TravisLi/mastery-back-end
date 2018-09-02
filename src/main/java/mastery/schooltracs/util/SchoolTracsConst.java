@@ -29,8 +29,11 @@ public class SchoolTracsConst {
 	public static final String ACT_FAC_REQ_URL = ACT_FAC_URL + "/read";
 	public static final String STAFF_URL = REST_URL + "/staff";
 	public static final String STAFF_REQ_URL = STAFF_URL + "/read";
+	public static final String JOURNAL_URL = REST_URL + "/journal";
+	public static final String JOURNAL_REQ_URL = JOURNAL_URL + "/read";
 	
 	public static final String OIM_CENTRE_ID = "2";
+	public static final Integer JOURNAL_PER_INDEX = 10;
 	
 	public static final SimpleDateFormat SDF_FULL = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	public static final SimpleDateFormat SDF_DATE = new SimpleDateFormat("yyyy-MM-dd");

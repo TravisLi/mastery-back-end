@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
 
 import mastery.model.FreeTimeslot;
+import mastery.model.Journal;
 import mastery.model.Lesson;
 import mastery.model.Room;
 import mastery.model.Staff;
@@ -797,6 +798,11 @@ public class SchoolTracsAgent {
 		return schLson(name, fromDate, toDate, SchoolTracsConst.DisplayMode.CUSTOMER.code(), opt);
 
 	}
+	
+	public List<Journal> getJournalByStdId(String stdId, Integer index) throws ClientProtocolException, IOException{
+		logger.info("Get Journal by Student Id start");
+		return digestListReadRspJson(conn.sendJournalReq(stdId, index) , Journal.class);
+	}
 
 	private Lesson getLsonById(String id){
 
@@ -979,7 +985,7 @@ public class SchoolTracsAgent {
 		return roomList;
 
 	}
-
+	
 	private static <T> T digestReadRspJson(String json, Class<T> c){
 		ObjectMapper mapper = new ObjectMapper();
 		JavaType type = mapper.getTypeFactory().constructParametricType(ReadResponse.class, c);
