@@ -168,7 +168,7 @@ public class SchoolTracsConn {
 		nvps.add(new BasicNameValuePair("start", startIdx.toString()));
 		nvps.add(new BasicNameValuePair("limit", SchoolTracsConst.JOURNAL_PER_INDEX.toString()));
 		nvps.add(new BasicNameValuePair("sort", "created"));
-		nvps.add(new BasicNameValuePair("dir", "ASC"));
+		nvps.add(new BasicNameValuePair("dir", "DESC"));
 		nvps.add(new BasicNameValuePair("customerId", custId));
 
 		HttpResponse request = this.excuteClient(prepareHttpFormPost(SchoolTracsConst.JOURNAL_REQ_URL, nvps));
