@@ -21,12 +21,12 @@ public class MasteryRestApp {
 	LessonNotificationService lessonNotificationService;
 
 	@Scheduled(cron = "${lessonNotificationService.job.cron[default:0 0 20 * * *]}")
-	public void sendLessNotificationOnTomrrorowJob() {
-		log.info("Start sendLessNotificationOnTomrrorowJob");
+	public void sendLessonNotificationOnTomrrorowJob() {
+		log.info("Start sendLessonNotificationOnTomrrorowJob");
 		Calendar date = Calendar.getInstance();
 		date.add(Calendar.DATE, 1);
 		lessonNotificationService.sendLessonNotificationOnDate(date.getTime());
-		log.info("End sendLessNotificationOnTomrrorowJob");
+		log.info("End sendLessonNotificationOnTomrrorowJob");
 	}
 
 
