@@ -1,14 +1,22 @@
 package mastery.schooltracs.core;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import mastery.model.*;
+import mastery.schooltracs.json.deserializer.SearchResponseDeserializer;
+import mastery.schooltracs.json.deserializer.StaffWorkHoursDeserializer;
+import mastery.schooltracs.model.*;
+import mastery.schooltracs.util.SchoolTracsConst;
+import mastery.schooltracs.util.SchoolTracsUtil;
+import mastery.util.MasteryUtil;
+import mastery.whatsapp.WhatsappRestAgent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -20,40 +28,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.type.CollectionType;
-
-import mastery.model.FreeTimeslot;
-import mastery.model.Journal;
-import mastery.model.Lesson;
-import mastery.model.Room;
-import mastery.model.Staff;
-import mastery.model.Teacher;
-import mastery.model.WorkHour;
-import mastery.schooltracs.json.deserializer.SearchResponseDeserializer;
-import mastery.schooltracs.json.deserializer.StaffWorkHoursDeserializer;
-import mastery.schooltracs.model.Activity;
-import mastery.schooltracs.model.Customer;
-import mastery.schooltracs.model.Facility;
-import mastery.schooltracs.model.FacilityMap;
-import mastery.schooltracs.model.ListReadResponse;
-import mastery.schooltracs.model.ReadResponse;
-import mastery.schooltracs.model.SearchActivityRequest;
-import mastery.schooltracs.model.SearchActivityResponse;
-import mastery.schooltracs.model.StStaff;
-import mastery.schooltracs.model.StaffMap;
-import mastery.schooltracs.model.StaffWorkHour;
-import mastery.schooltracs.util.SchoolTracsConst;
-import mastery.schooltracs.util.SchoolTracsUtil;
-import mastery.util.MasteryUtil;
-import mastery.whatsapp.WhatsappRestAgent;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class SchoolTracsAgent {
@@ -113,6 +91,10 @@ public class SchoolTracsAgent {
 			e.printStackTrace();
 		}
 
+	}
+
+	public Collection<Room> getRooms() {
+		return rmHash.values();
 	}
 
 	private void loadStfHash(){

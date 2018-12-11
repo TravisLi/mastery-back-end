@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -58,9 +59,12 @@ public class RestApiController {
 		
 	}
 	
-	@RequestMapping(value = "/check", method = RequestMethod.GET)
+	@RequestMapping(value = "/check/schooltracs", method = RequestMethod.GET)
 	public ResponseEntity<Boolean> check() {
-		return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		if (CollectionUtils.isEmpty(sAgent.getRooms()))
+			return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+
+		return new ResponseEntity<>(true, HttpStatus.OK);
 	}
 	
 	@Deprecated
