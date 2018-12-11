@@ -148,10 +148,30 @@ public class SchoolTracsConn {
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
 		nvps.add(new BasicNameValuePair("start", "0"));
 		nvps.add(new BasicNameValuePair("limit", "50"));
-		nvps.add(new BasicNameValuePair("centerId", "2"));
+		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
 		nvps.add(new BasicNameValuePair("deleted", "0"));
 
 		HttpResponse request = this.excuteClient(prepareHttpFormPost(SchoolTracsConst.FAC_REQ_URL, nvps));
+
+		return EntityUtils.toString(request.getEntity());
+
+	}
+	
+	public String sendJournalReq(String custId, Integer index) throws ClientProtocolException, IOException{
+
+		logger.info("Send Journal Request");
+
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		
+		Integer startIdx = index * SchoolTracsConst.JOURNAL_PER_INDEX;
+		
+		nvps.add(new BasicNameValuePair("start", startIdx.toString()));
+		nvps.add(new BasicNameValuePair("limit", SchoolTracsConst.JOURNAL_PER_INDEX.toString()));
+		nvps.add(new BasicNameValuePair("sort", "created"));
+		nvps.add(new BasicNameValuePair("dir", "DESC"));
+		nvps.add(new BasicNameValuePair("customerId", custId));
+
+		HttpResponse request = this.excuteClient(prepareHttpFormPost(SchoolTracsConst.JOURNAL_REQ_URL, nvps));
 
 		return EntityUtils.toString(request.getEntity());
 

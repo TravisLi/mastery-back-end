@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
 
 import mastery.model.FreeTimeslot;
+import mastery.model.Journal;
 import mastery.model.Lesson;
 import mastery.model.Room;
 import mastery.model.Staff;
@@ -302,6 +303,7 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
 		nvps.add(new BasicNameValuePair("filter[0][data][value]", phone));
 		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
@@ -329,6 +331,7 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("filter[1][data][type]", "string"));
 		nvps.add(new BasicNameValuePair("filter[1][data][value]", name));
 		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
@@ -358,6 +361,7 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("filter[1][data][comparison]", "eq"));
 		nvps.add(new BasicNameValuePair("filter[1][data][value]", barcode));
 		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
@@ -381,6 +385,7 @@ public class SchoolTracsAgent {
 		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
 		nvps.add(new BasicNameValuePair("filter[0][data][value]", phone));
 		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
+		nvps.add(new BasicNameValuePair("deleted", "0"));
 		nvps.add(new BasicNameValuePair("start", "0"));
 
 		try {
@@ -793,6 +798,11 @@ public class SchoolTracsAgent {
 		return schLson(name, fromDate, toDate, SchoolTracsConst.DisplayMode.CUSTOMER.code(), opt);
 
 	}
+	
+	public List<Journal> getJournalByStdId(String stdId, Integer index) throws ClientProtocolException, IOException{
+		logger.info("Get Journal by Student Id start");
+		return digestListReadRspJson(conn.sendJournalReq(stdId, index) , Journal.class);
+	}
 
 	private Lesson getLsonById(String id){
 
@@ -975,7 +985,7 @@ public class SchoolTracsAgent {
 		return roomList;
 
 	}
-
+	
 	private static <T> T digestReadRspJson(String json, Class<T> c){
 		ObjectMapper mapper = new ObjectMapper();
 		JavaType type = mapper.getTypeFactory().constructParametricType(ReadResponse.class, c);

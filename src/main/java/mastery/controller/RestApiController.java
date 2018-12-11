@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import mastery.model.Auth;
+import mastery.model.Journal;
 import mastery.model.Lesson;
 import mastery.model.Student;
 import mastery.model.User;
@@ -186,6 +187,31 @@ public class RestApiController {
 		logger.info("Update User Password");
 				
 		return new ResponseEntity<Boolean>(sAgent.updateUserPwd(custId, oldPwd, newPwd), HttpStatus.OK);
+		
+	}
+	
+	/*@RequestMapping(value = "/journal/parent/{stdIds}/{index}", method = RequestMethod.GET)
+	public ResponseEntity<Journal> getJournalForParent(@PathVariable("phone")String phone, @PathVariable("index")Integer index){
+		logger.info("Get Journal for Parent");
+		
+		return new ResponseEntity<Journal>(new Journal(), HttpStatus.OK);
+		
+	}*/
+	
+	@RequestMapping(value = "/journal/{stdId}/{index}", method = RequestMethod.GET)
+	public ResponseEntity<List<Journal>> getJournalForStd(@PathVariable("stdId")String stdId, @PathVariable("index")Integer index){
+		logger.info("Get Journal for Students");
+		
+		List<Journal> list = new ArrayList<Journal>();
+		
+		try {
+			list = sAgent.getJournalByStdId(stdId, index);
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return new ResponseEntity<List<Journal>>(list, HttpStatus.OK);
 		
 	}
 	
