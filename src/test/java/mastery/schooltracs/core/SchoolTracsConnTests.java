@@ -1,6 +1,6 @@
 package mastery.schooltracs.core;
 
-import mastery.boot.MasteryRestApp;
+import mastery.MasteryRestApp;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

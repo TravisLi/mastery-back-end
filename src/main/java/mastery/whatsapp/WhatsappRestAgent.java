@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.Charset;
+
 @Service
 public class WhatsappRestAgent {
 
@@ -133,7 +135,7 @@ public class WhatsappRestAgent {
 
 		String encodedMsg = "";
 		
-		encodedMsg = new URLEncoder().encode(msg, "UTF-8");
+		encodedMsg = new URLEncoder().encode(msg, Charset.forName("UTF-8"));
 
 		String url = String.format(SEND_REST_API , whatsappServer, phoneNo, encodedMsg);
 		logger.debug("url=" + url);

@@ -1,27 +1,13 @@
 package mastery.whatsapp;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.util.Collections;
-
-import javax.annotation.PostConstruct;
-
+import mastery.model.Lesson;
+import mastery.model.Staff;
+import mastery.schooltracs.model.Customer;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.remote.Command;
-import org.openqa.selenium.remote.CommandExecutor;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.HttpCommandExecutor;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.remote.Response;
-import org.openqa.selenium.remote.SessionId;
+import org.openqa.selenium.remote.*;
 import org.openqa.selenium.remote.http.JsonHttpCommandCodec;
 import org.openqa.selenium.remote.http.JsonHttpResponseCodec;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -30,10 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import mastery.model.Lesson;
-import mastery.model.Staff;
-import mastery.schooltracs.model.Customer;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.Collections;
 
+@Deprecated
 public class WhatsappWebAgent {
 
 	private static final Logger logger = LoggerFactory.getLogger(WhatsappWebAgent.class);
@@ -62,7 +50,7 @@ public class WhatsappWebAgent {
 
 	}*/
 
-	@PostConstruct
+	//@PostConstruct
 	public void init(){
 
 		System.setProperty("webdriver.chrome.driver", this.chromeDrivePath);

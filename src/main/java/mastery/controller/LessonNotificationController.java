@@ -3,6 +3,7 @@ package mastery.controller;
 import mastery.service.LessonNotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +13,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-@CrossOrigin(maxAge = 4800, allowCredentials = "false") 
 @RestController
-@RequestMapping("/api/lesson-notify")
+@RequestMapping(value = "/api/lesson-notify")
 public class LessonNotificationController {
 
 	private static final Logger log = LoggerFactory.getLogger(LessonNotificationController.class);
@@ -22,6 +22,7 @@ public class LessonNotificationController {
 
 	private final LessonNotificationService lessonNotificationService;
 
+	@Autowired
 	public LessonNotificationController(LessonNotificationService lessonNotificationService) {
 		this.lessonNotificationService = lessonNotificationService;
 	}
