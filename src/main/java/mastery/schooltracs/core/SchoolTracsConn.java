@@ -1,16 +1,13 @@
 package mastery.schooltracs.core;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import mastery.model.Lesson;
-import mastery.schooltracs.json.serializer.ExistMakeupRequestSerializer;
-import mastery.schooltracs.json.serializer.NewMakeupRequestSerializer;
-import mastery.schooltracs.json.serializer.SearchRequestSerializer;
-import mastery.schooltracs.json.serializer.StaffWorkHourRequestSerializer;
-import mastery.schooltracs.model.*;
-import mastery.schooltracs.util.SchoolTracsConst;
-import mastery.schooltracs.util.SchoolTracsUtil;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpHeaders;
@@ -32,12 +29,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import mastery.model.Lesson;
+import mastery.schooltracs.json.serializer.ExistMakeupRequestSerializer;
+import mastery.schooltracs.json.serializer.IncomeReportRequestSerializer;
+import mastery.schooltracs.json.serializer.NewMakeupRequestSerializer;
+import mastery.schooltracs.json.serializer.SearchRequestSerializer;
+import mastery.schooltracs.json.serializer.StaffWorkHourRequestSerializer;
+import mastery.schooltracs.model.Customer;
+import mastery.schooltracs.model.CustomerUpdateRequest;
+import mastery.schooltracs.model.ExistMakeupRequest;
+import mastery.schooltracs.model.IncomeReportRequest;
+import mastery.schooltracs.model.NewMakeupRequest;
+import mastery.schooltracs.model.SearchActivityRequest;
+import mastery.schooltracs.model.StaffWorkHourRequest;
+import mastery.schooltracs.util.SchoolTracsConst;
+import mastery.schooltracs.util.SchoolTracsUtil;
 
 @Service
 public class SchoolTracsConn {
@@ -177,6 +187,16 @@ public class SchoolTracsConn {
 
 	}
 
+	public String sendIncomeRptReq(String centreId, String fromDate, String toDate) throws ClientProtocolException, IOException{
+
+		IncomeReportRequest req = new IncomeReportRequest(reqSeq, Integer.parseInt(centreId), fromDate,toDate);
+
+		HttpResponse request = this.excuteClient(prepareHttpJsonPost(SchoolTracsConst.TASK_REQ_URL, buildIncomeRptReqJson(req)));
+
+		return EntityUtils.toString(request.getEntity());
+
+	}
+	
 	public String sendSchReq(String searchStr, Date fromDate, Date toDate, String displayMode, SearchActivityRequest.ContentOpt contentOpt) throws ClientProtocolException, IOException{
 
 		SearchActivityRequest req = new SearchActivityRequest(reqSeq,SchoolTracsConst.Task.SEARCH_ACTIVITY.code(),displayMode,searchStr,fromDate,toDate,"",contentOpt);
@@ -310,6 +330,14 @@ public class SchoolTracsConn {
 		return post;
 	}
 
+	private static String buildIncomeRptReqJson(IncomeReportRequest req) throws JsonProcessingException{
+
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(IncomeReportRequest.class, new IncomeReportRequestSerializer());
+
+		return buildReqJson(module,req);
+	}
+	
 	private static String buildSchReqJson(SearchActivityRequest req) throws JsonProcessingException{
 
 		SimpleModule module = new SimpleModule();

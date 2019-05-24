@@ -1,22 +1,15 @@
 package mastery.schooltracs.core;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import mastery.model.*;
-import mastery.schooltracs.json.deserializer.SearchResponseDeserializer;
-import mastery.schooltracs.json.deserializer.StaffWorkHoursDeserializer;
-import mastery.schooltracs.model.*;
-import mastery.schooltracs.util.SchoolTracsConst;
-import mastery.schooltracs.util.SchoolTracsUtil;
-import mastery.util.MasteryUtil;
-import mastery.whatsapp.WhatsappRestAgent;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -28,10 +21,41 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.type.CollectionType;
+
+import mastery.model.FreeTimeslot;
+import mastery.model.Journal;
+import mastery.model.Lesson;
+import mastery.model.Room;
+import mastery.model.Staff;
+import mastery.model.Teacher;
+import mastery.model.WorkHour;
+import mastery.schooltracs.json.deserializer.SearchResponseDeserializer;
+import mastery.schooltracs.json.deserializer.StaffWorkHoursDeserializer;
+import mastery.schooltracs.model.Activity;
+import mastery.schooltracs.model.Customer;
+import mastery.schooltracs.model.Facility;
+import mastery.schooltracs.model.FacilityMap;
+import mastery.schooltracs.model.IncomeReportResponse;
+import mastery.schooltracs.model.ListReadResponse;
+import mastery.schooltracs.model.ReadResponse;
+import mastery.schooltracs.model.SearchActivityRequest;
+import mastery.schooltracs.model.SearchActivityResponse;
+import mastery.schooltracs.model.StStaff;
+import mastery.schooltracs.model.StaffMap;
+import mastery.schooltracs.model.StaffWorkHour;
+import mastery.schooltracs.util.SchoolTracsConst;
+import mastery.schooltracs.util.SchoolTracsUtil;
+import mastery.util.MasteryUtil;
+import mastery.whatsapp.WhatsappRestAgent;
 
 @Service
 public class SchoolTracsAgent {
@@ -197,35 +221,6 @@ public class SchoolTracsAgent {
 		}
 		return null;
 	}
-
-	/*private StStaff schStfsById(String id) throws Exception{
-		logger.info("Search Staff by Id Start");
-		logger.info("id = " + id);
-
-		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-		nvps.add(new BasicNameValuePair("filter[0][field]", "id"));
-		nvps.add(new BasicNameValuePair("filter[0][data][type]", "numeric"));
-		nvps.add(new BasicNameValuePair("filter[0][data][comparison]", "eq"));
-		nvps.add(new BasicNameValuePair("filter[0][data][value]", id));
-		nvps.add(new BasicNameValuePair("centerId", SchoolTracsConst.OIM_CENTRE_ID));
-		nvps.add(new BasicNameValuePair("start", "0"));
-
-		try {
-
-			List<StStaff> list = digestListReadRspJson(conn.sendStfReq(nvps), StStaff.class);
-
-			if(list.size()==1){
-				return list.get(0);
-			}else if(list.size()>1){
-				throw new Exception("More than one staff share the same id");
-			}
-
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-			e.printStackTrace();
-		}
-		return null;
-	}*/
 
 	//Activity
 	private List<FacilityMap> schActFacById(String actId){
@@ -940,7 +935,23 @@ public class SchoolTracsAgent {
 		});
 	}
 
+	public List<IncomeReportResponse> getIncomeReport(String centreId, String fromDate, String toDate) throws JsonParseException, JsonMappingException, ClientProtocolException, IOException{
+		
+		return jsonToIncomeRptRsp(conn.sendIncomeRptReq(centreId, fromDate, toDate));
+		
+	}
+	
+	
 	//aux
+	
+	private static List<IncomeReportResponse> jsonToIncomeRptRsp(String json) throws JsonParseException, JsonMappingException, IOException{
+
+		logger.info("Json="+json);
+
+		return digestListReadRspJson(json, IncomeReportResponse.class);
+		
+	}
+	
 	private static SearchActivityResponse jsonToSchRsp(String json) throws JsonParseException, JsonMappingException, IOException{
 
 		logger.info("Json="+json);

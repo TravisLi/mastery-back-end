@@ -18,7 +18,7 @@ import java.nio.charset.Charset;
 @Service
 public class WhatsappRestAgent {
 
-	private static final Logger logger = LoggerFactory.getLogger(WhatsappWebAgent.class);
+	private static final Logger logger = LoggerFactory.getLogger(WhatsappRestAgent.class);
 	private static final String MOBILE_REGEX = "^[965][0-9]{7}";
 
 	@Value("${whatsapp_server}")

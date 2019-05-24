@@ -16,7 +16,7 @@ public class SchoolTracsConst {
 	
 	public static final String LOGIN_URL = HOST_URL + "/app/login";
 	public static final String REST_URL = HOST_URL + "/masteryoim/app";
-	public static final String TASK_REQ_URL = REST_URL + "/?v=&c=2";
+	public static final String TASK_REQ_URL = REST_URL + "/?v=&c=1";
 	public static final String FAC_REQ_URL = REST_URL + "/facility/read";
 	public static final String CUST_URL = REST_URL + "/customer";
 	public static final String CUST_REQ_URL = CUST_URL + "/read";
@@ -33,6 +33,8 @@ public class SchoolTracsConst {
 	public static final String JOURNAL_REQ_URL = JOURNAL_URL + "/read";
 	
 	public static final String OIM_CENTRE_ID = "2";
+	public static final String HMTP_CENTRE_ID = "3";
+			
 	public static final Integer JOURNAL_PER_INDEX = 10;
 	
 	public static final SimpleDateFormat SDF_FULL = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -41,10 +43,12 @@ public class SchoolTracsConst {
 	
 	public enum Task{
 		
-		SEARCH_ACTIVITY("Activity.searchActivities"),
-		NEW_MAKE_UP("ActivityCustomer.newMakeup"),
 		EXIST_MAKE_UP("ActivityCustomer.makeup"),
+		INCOME_RPT("Income_Report.getData"),
+		NEW_MAKE_UP("ActivityCustomer.newMakeup"),
+		SEARCH_ACTIVITY("Activity.searchActivities"),
 		STAFF_WORK_HR("Staff.getWorkingHour");
+		
 		private String code;
 		
 		Task(String code){
