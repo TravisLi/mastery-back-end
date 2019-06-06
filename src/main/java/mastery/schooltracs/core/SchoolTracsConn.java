@@ -74,6 +74,11 @@ public class SchoolTracsConn {
 		Thread t = new Thread(obsver);
 		t.start();
 	}
+	
+	public SchoolTracsConn(String uname, String pwd){
+		this.uname = uname;
+		this.pwd = pwd;
+	}
 
 	@PostConstruct
 	public void login() throws IOException{
@@ -141,6 +146,20 @@ public class SchoolTracsConn {
 		logger.info("Send Staff Request");
 
 		return this.sendNvpReq(nvps, SchoolTracsConst.STAFF_REQ_URL);
+
+	}
+	
+	public String sendInvReq(List<NameValuePair> nvps) throws ClientProtocolException, UnsupportedEncodingException, IOException{
+		logger.info("Send Invoice Request");
+
+		return this.sendNvpReq(nvps, SchoolTracsConst.INVOICE_REQ_URL);
+
+	}
+	
+	public String sendInvItmReq(List<NameValuePair> nvps) throws ClientProtocolException, UnsupportedEncodingException, IOException{
+		logger.info("Send Invoice Item Request");
+
+		return this.sendNvpReq(nvps, SchoolTracsConst.INVOICE_ITEM_REQ_URL);
 
 	}
 	

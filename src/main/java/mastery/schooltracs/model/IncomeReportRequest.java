@@ -24,21 +24,21 @@ public class IncomeReportRequest {
 	
 	public static class IncomeRptOpt{
 		
-		private Integer centreId;
+		private Integer centerId;
 		private String start;
 		private String end;
 		
-		public IncomeRptOpt(Integer centreId, String start, String end){
-			this.centreId = centreId;
+		public IncomeRptOpt(Integer centerId, String start, String end){
+			this.centerId = centerId;
 			this.start = start;
 			this.end = end;
 		}
 		
-		public Integer getCentreId() {
-			return centreId;
+		public Integer getCenterId() {
+			return centerId;
 		}
-		public void setCentreId(Integer centreId) {
-			this.centreId = centreId;
+		public void setCenterId(Integer centerId) {
+			this.centerId = centerId;
 		}
 		public String getStart() {
 			return start;

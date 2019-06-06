@@ -1,43 +1,19 @@
 package mastery.schooltracs.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IncomeReportResponse {
+public class IncomeReportResponse<T> {
 
-	private String studentNumber;
-	private String level;
-	private String phone;
-	private String studentName;
-	private String receiptDetail;
-	private String reonciled;
-	private String reconcileDate;
-	private String startDate;
-	private String endDate;
-	private String facility;
-	private String paymentStaff;
-	private String receiptNum;
-	private String voided;
-	private String center;
-	private String paymentDate;
-	private String remarks;
-	private String courseFee;
-	private String productFee;
-	private String otherFee;
-	private String deposit;
-	private String depositRefund;
-	private String membershipFee;
-	private String price;
-	private String paymentMethod;
-	private String bankName;
-	private String chequeNo;
-	private String invoice;
+	private List<T> data;
 	
-	public String getStudentNumber() {
-		return studentNumber;
+	public List<T> getData() {
+		return data;
 	}
-	public void setStudentNumber(String studentNumber) {
-		this.studentNumber = studentNumber;
+	public void setData(List<T> data) {
+		this.data = data;
 	}
-
+	
 }

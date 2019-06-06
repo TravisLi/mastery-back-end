@@ -5,16 +5,16 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ListReadResponse<T> {
+public class ListArrayReadResponse<T> {
 
-	private Integer total;
+	private List<String> total;
 	private List<T> data;	
 	private Boolean success;
 	
-	public Integer getTotal() {
+	public List<String> getTotal() {
 		return total;
 	}
-	public void setTotal(Integer total) {
+	public void setTotal(List<String> total) {
 		this.total = total;
 	}
 	public List<T> getData() {

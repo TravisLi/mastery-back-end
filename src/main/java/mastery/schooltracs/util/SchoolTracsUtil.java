@@ -199,6 +199,38 @@ public class SchoolTracsUtil {
 		return SchoolTracsConst.Level.NONE;
 	}
 	
+	public static String translateLevel(String lvl){
+		if(lvl!=null){
+			switch(lvl){
+			case "P1":
+				return "小一";
+			case "P2":
+				return "小二";
+			case "P3":
+				return "小三";
+			case "P4":
+				return "小四";
+			case "P5":
+				return "小五";
+			case "P6":
+				return "小六";
+			case "S1":
+				return "中一";
+			case "S2":
+				return "中二";
+			case "S3":
+				return "中三";
+			case "S4":
+				return "中四";
+			case "S5":
+				return "中五";
+			case "S6":
+				return "中六";
+			}
+		}
+		return "未知";
+	}
+	
 	public static HashMap<Integer, WorkHour> stfWkHrToMap(List<StaffWorkHour> list){
 		
 		logger.info("Staff Working Hour to Map start");

@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionType;
@@ -44,7 +45,11 @@ import mastery.schooltracs.model.Activity;
 import mastery.schooltracs.model.Customer;
 import mastery.schooltracs.model.Facility;
 import mastery.schooltracs.model.FacilityMap;
+import mastery.schooltracs.model.IncomeReportData;
 import mastery.schooltracs.model.IncomeReportResponse;
+import mastery.schooltracs.model.Invoice;
+import mastery.schooltracs.model.InvoiceItem;
+import mastery.schooltracs.model.ListArrayReadResponse;
 import mastery.schooltracs.model.ListReadResponse;
 import mastery.schooltracs.model.ReadResponse;
 import mastery.schooltracs.model.SearchActivityRequest;
@@ -69,7 +74,12 @@ public class SchoolTracsAgent {
 	private HashMap<String, Staff> adminHash = new HashMap<String, Staff>();
 
 	private HashMap<String, Staff> skipHash = new HashMap<String, Staff>();
-
+	
+	public SchoolTracsAgent(SchoolTracsConn conn) throws IOException{
+		this.conn = conn;
+		this.conn.login();
+	}
+	
 	@Autowired
 	private SchoolTracsConn conn;
 
@@ -194,6 +204,60 @@ public class SchoolTracsAgent {
 		return null;
 	}
 
+	public Invoice schInvByInvNo(String invNo) throws Exception{
+		logger.info("Search Invoice by Invoice No Start");
+		logger.info("Invoice no = " + invNo);
+		
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("start", "0"));
+		nvps.add(new BasicNameValuePair("limit", "50"));
+		nvps.add(new BasicNameValuePair("centerId", "1"));
+		nvps.add(new BasicNameValuePair("loadType", "all"));
+		nvps.add(new BasicNameValuePair("sort", "created"));
+		nvps.add(new BasicNameValuePair("dir", "DESC"));
+		nvps.add(new BasicNameValuePair("filter[0][field]", "number"));
+		nvps.add(new BasicNameValuePair("filter[0][data][type]", "string"));
+		nvps.add(new BasicNameValuePair("filter[0][data][value]", invNo));
+		
+		try {
+
+			List<Invoice> list = digestListArrayReadRspJson(conn.sendInvReq(nvps), Invoice.class);
+
+			if(list.size()==1){
+				return list.get(0);
+			}else if(list.size()>1){
+				throw new Exception("More than one invoice share the same name");
+			}
+
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+		
+	}
+	
+	public List<InvoiceItem> schInvItmByInvId(String invId) throws Exception{
+		logger.info("Search Invoice Item by Invoice Id Start");
+		logger.info("Invoice id = " + invId);
+		
+		List<InvoiceItem> list = new ArrayList<InvoiceItem>();
+		
+		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+		nvps.add(new BasicNameValuePair("invoiceId", invId));
+		
+		try {
+
+			list = digestListReadRspJson(conn.sendInvItmReq(nvps), InvoiceItem.class);
+
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		return list;
+		
+	}
+	
 	private StStaff schStfsByName(String name) throws Exception{
 		logger.info("Search Staff by Name Start");
 		logger.info("name = " + name);
@@ -935,7 +999,7 @@ public class SchoolTracsAgent {
 		});
 	}
 
-	public List<IncomeReportResponse> getIncomeReport(String centreId, String fromDate, String toDate) throws JsonParseException, JsonMappingException, ClientProtocolException, IOException{
+	public List<IncomeReportData> getIncomeReport(String centreId, String fromDate, String toDate) throws JsonParseException, JsonMappingException, ClientProtocolException, IOException{
 		
 		return jsonToIncomeRptRsp(conn.sendIncomeRptReq(centreId, fromDate, toDate));
 		
@@ -944,11 +1008,11 @@ public class SchoolTracsAgent {
 	
 	//aux
 	
-	private static List<IncomeReportResponse> jsonToIncomeRptRsp(String json) throws JsonParseException, JsonMappingException, IOException{
+	private static List<IncomeReportData> jsonToIncomeRptRsp(String json) throws JsonParseException, JsonMappingException, IOException{
 
 		logger.info("Json="+json);
-
-		return digestListReadRspJson(json, IncomeReportResponse.class);
+		
+		return digestIncomeRptRspJson(processIncomeRptRsp(json), IncomeReportData.class);
 		
 	}
 	
@@ -979,6 +1043,58 @@ public class SchoolTracsAgent {
 
 	}
 	
+	private static String processIncomeRptRsp(String json){
+
+		String rspNo = "";
+		String dataJson = "";
+		
+		try {
+			JsonFactory factory = new JsonFactory();
+			JsonParser parser  = factory.createParser(json);
+
+			while(!parser.isClosed()){
+				JsonToken t = parser.nextToken();
+				if(JsonToken.FIELD_NAME.equals(t)){
+					String f = parser.getCurrentName();
+					if(f.matches("^[0-9]+ $")){
+						rspNo = f;
+						break;
+					}
+				}
+			}
+			
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode root = mapper.readTree(json);
+			
+			if(root.isObject()){
+				dataJson = root.get(rspNo).toString();
+				logger.info(dataJson);
+			}
+					
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+
+		return dataJson;
+	}
+	
+	private static <T> List<T> digestIncomeRptRspJson(String json, Class<T> c){
+		ObjectMapper mapper = new ObjectMapper();
+		JavaType type = mapper.getTypeFactory().constructParametricType(IncomeReportResponse.class, c);
+		try {
+			logger.debug("json="+json);
+			IncomeReportResponse<T> r = mapper.readValue(json, type);
+			if(r!=null){
+				return r.getData();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return new ArrayList<T>();
+	}
+	
 	private static <T> T digestReadRspJson(String json, Class<T> c){
 		ObjectMapper mapper = new ObjectMapper();
 		JavaType type = mapper.getTypeFactory().constructParametricType(ReadResponse.class, c);
@@ -1001,6 +1117,22 @@ public class SchoolTracsAgent {
 		try {
 			logger.debug("json="+json);
 			ListReadResponse<T> r = mapper.readValue(json, type);
+			if(r.getSuccess()){
+				return r.getData();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return new ArrayList<T>();
+	}
+	
+	private static <T> List<T> digestListArrayReadRspJson(String json, Class<T> c){
+		ObjectMapper mapper = new ObjectMapper();
+		JavaType type = mapper.getTypeFactory().constructParametricType(ListArrayReadResponse.class, c);
+		try {
+			logger.debug("json="+json);
+			ListArrayReadResponse<T> r = mapper.readValue(json, type);
 			if(r.getSuccess()){
 				return r.getData();
 			}
